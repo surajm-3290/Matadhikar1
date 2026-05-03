@@ -1,0 +1,2398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MatAdhikar — Election Process Educator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script>
+// Suppress Babel in-browser transformer production warning (cosmetic only)
+(function(){var w=console.warn;console.warn=function(){if(arguments[0]&&typeof arguments[0]==='string'&&arguments[0].indexOf('Babel')>-1)return;w.apply(console,arguments);};})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #0a0a0f;
+    --paper: #f5f0e8;
+    --saffron: #ff6b1a;
+    --saffron-glow: #ff6b1a44;
+    --green: #00c896;
+    --green-glow: #00c89644;
+    --blue: #4a9eff;
+    --purple: #b06aff;
+    --yellow: #ffe135;
+    --red: #ff3b5c;
+    --card-bg: #13131f;
+    --card-border: #2a2a3d;
+    --muted: #8888aa;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  @keyframes floatUp { from { opacity:0; transform: translateY(30px); } to { opacity:1; transform: translateY(0); } }
+  @keyframes pulse-ring { 0%,100%{ transform:scale(1); opacity:1; } 50%{ transform:scale(1.05); opacity:.8; } }
+  @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+  @keyframes shimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeIn { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
+  @keyframes vvpat-emerge { 0%{height:0;opacity:0} 30%{opacity:1} 100%{height:120px;opacity:1} }
+  @keyframes confetti-fall {
+    0%{transform:translateY(-10px) rotate(0deg); opacity:1}
+    100%{transform:translateY(100vh) rotate(720deg); opacity:0}
+  }
+  @keyframes glow-pulse { 0%,100%{box-shadow:0 0 20px var(--saffron-glow)} 50%{box-shadow:0 0 40px var(--saffron),0 0 80px var(--saffron-glow)} }
+  @keyframes neon-pulse { 0%,100%{box-shadow:0 0 10px #ff6ec7,0 0 20px #ff6ec744} 50%{box-shadow:0 0 20px #ff6ec7,0 0 40px #ff6ec7,0 0 60px #ff6ec744} }
+  @keyframes score-count { from{transform:scale(1.3);color:#ffcc00} to{transform:scale(1);} }
+
+  .float-up { animation: floatUp .5s ease forwards; }
+  .fade-in { animation: fadeIn .4s ease forwards; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--ink); }
+  ::-webkit-scrollbar-thumb { background: var(--saffron); border-radius: 2px; }
+
+  .ticker-wrap { overflow: hidden; background: var(--saffron); padding: 10px 0; }
+  .ticker-inner { display: flex; animation: ticker 25s linear infinite; width: max-content; }
+  .ticker-item { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--ink); font-weight: 700; padding: 0 40px; white-space: nowrap; }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,107,26,.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .btn-primary {
+    background: var(--saffron);
+    color: var(--ink);
+    border: none;
+    border-radius: 50px;
+    padding: 14px 32px;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s;
+    letter-spacing: .5px;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--saffron-glow); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: .4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--paper);
+    border: 1px solid var(--card-border);
+    border-radius: 50px;
+    padding: 12px 28px;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .btn-ghost:hover { border-color: var(--saffron); background: var(--saffron-glow); }
+
+  .btn-green {
+    background: var(--green);
+    color: var(--ink);
+    border: none;
+    border-radius: 50px;
+    padding: 14px 32px;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .btn-green:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--green-glow); }
+
+  /* ── NEW HERO BUTTONS ── */
+  .btn-vice-city {
+    background: linear-gradient(135deg, #1a0010, #0a0a1a);
+    color: #ff6ec7;
+    border: 1.5px solid #ff6ec7;
+    border-radius: 50px;
+    padding: 13px 28px;
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 1.5px;
+    transition: all .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .btn-vice-city:hover {
+    background: linear-gradient(135deg, #2a0020, #1a0a2a);
+    animation: neon-pulse 1s ease infinite;
+    transform: translateY(-2px);
+  }
+
+  .btn-civic-score {
+    background: linear-gradient(135deg, #001a0a, #0a1a1a);
+    color: #00ffcc;
+    border: 1.5px solid #00ffcc;
+    border-radius: 50px;
+    padding: 13px 28px;
+    font-family: 'Orbitron', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 1.5px;
+    transition: all .2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .btn-civic-score:hover {
+    background: linear-gradient(135deg, #002a14, #0a2a2a);
+    box-shadow: 0 0 20px #00ffcc44, 0 0 40px #00ffcc22;
+    transform: translateY(-2px);
+  }
+
+  /* ── MODAL OVERLAY ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.88);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 20px;
+  }
+  .modal-inner {
+    width: 100%;
+    max-width: 780px;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    margin: auto;
+    animation: fadeIn .3s ease;
+  }
+  .modal-close {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s;
+  }
+  .modal-close:hover { background: rgba(255,60,60,0.3); }
+
+  /* ── CIVIC SCORE CALCULATOR ── */
+  .score-question {
+    background: #0d0d1a;
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    transition: border-color .2s;
+  }
+  .score-question:focus-within { border-color: var(--saffron); }
+  .score-q-text { font-size: 13px; font-weight: 600; color: var(--paper); margin-bottom: 10px; line-height: 1.5; }
+  .score-options { display: flex; flex-wrap: wrap; gap: 8px; }
+  .score-opt {
+    padding: 7px 16px;
+    border-radius: 99px;
+    border: 1px solid var(--card-border);
+    background: #1a1a2e;
+    color: var(--muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .15s;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .score-opt:hover { border-color: var(--saffron); color: var(--paper); }
+  .score-opt.selected { border-color: var(--saffron); background: var(--saffron-glow); color: var(--saffron); font-weight: 700; }
+  .score-opt.selected-green { border-color: var(--green); background: var(--green-glow); color: var(--green); font-weight: 700; }
+  .score-opt.selected-blue { border-color: var(--blue); background: rgba(74,158,255,.15); color: var(--blue); font-weight: 700; }
+
+  .score-result-bar { height: 8px; border-radius: 4px; background: #1a1a2e; overflow: hidden; margin: 6px 0; }
+  .score-result-fill { height: 8px; border-radius: 4px; transition: width 1s ease; }
+
+  .quiz-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: #1a1a2e;
+    border: 2px solid var(--card-border);
+    border-radius: 14px;
+    padding: 16px 20px;
+    color: var(--paper);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color .2s, background .2s, transform .15s;
+    margin-bottom: 10px;
+  }
+  .quiz-option:hover { border-color: var(--blue); background: rgba(74,158,255,.1); transform: translateX(4px); }
+  .quiz-option.correct { border-color: var(--green); background: var(--green-glow); }
+  .quiz-option.wrong { border-color: var(--red); background: rgba(255,59,92,.15); }
+  .quiz-option:disabled { cursor: default; transform: none; }
+
+  .progress-bar-bg { background: #1a1a2e; border-radius: 999px; height: 6px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--saffron), var(--yellow)); border-radius: 999px; transition: width .5s ease; }
+
+  .phase-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: default;
+    opacity: .5;
+    transition: opacity .3s;
+    font-family: 'Syne', sans-serif;
+  }
+  .phase-step.active { opacity: 1; background: rgba(255,107,26,.15); color: var(--saffron); }
+  .phase-step.done { opacity: .8; color: var(--green); }
+
+  .evm-machine {
+    background: linear-gradient(145deg, #1e2a4a, #162040);
+    border: 3px solid #2a4080;
+    border-radius: 24px;
+    padding: 32px 24px;
+    max-width: 340px;
+    margin: 0 auto;
+    box-shadow: 0 20px 60px rgba(0,0,50,.5);
+    position: relative;
+  }
+  .evm-screen {
+    background: #001a00;
+    border: 2px solid #00aa00;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    color: #00ff00;
+    font-size: 13px;
+    margin-bottom: 24px;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 0 0 10px #00ff00;
+  }
+  .evm-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #0d1b3e, #162040);
+    border: 2px solid #2a4080;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    color: var(--paper);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    width: 100%;
+  }
+  .evm-btn:hover:not(:disabled) { border-color: var(--blue); background: rgba(74,158,255,.15); }
+  .evm-btn:disabled { opacity: .5; cursor: not-allowed; }
+  .evm-btn-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .vvpat-box {
+    background: linear-gradient(145deg, #2a1a0a, #1a1205);
+    border: 2px solid #8b6914;
+    border-radius: 16px;
+    padding: 20px;
+    max-width: 280px;
+    margin: 20px auto;
+    position: relative;
+    overflow: hidden;
+  }
+  .vvpat-slip {
+    background: white;
+    color: #111;
+    border-radius: 8px;
+    padding: 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    overflow: hidden;
+    transition: all .3s ease;
+  }
+  .vvpat-slip.emerging { animation: vvpat-emerge .4s ease forwards; }
+
+  @keyframes vvpat-emerge { 0%{height:0;opacity:0} 30%{opacity:1} 100%{height:120px;opacity:1} }
+
+  .count-stage {
+    padding: 16px 20px;
+    border-radius: 14px;
+    border: 1px solid var(--card-border);
+    background: #0d0d1a;
+    margin-bottom: 12px;
+    transition: all .4s ease;
+    opacity: .4;
+  }
+  .count-stage.active { opacity: 1; border-color: var(--saffron); background: rgba(255,107,26,.08); }
+  .count-stage.done { opacity: 1; border-color: var(--green); background: rgba(0,200,150,.08); }
+
+  .cert-container {
+    background: linear-gradient(135deg, #0a0a1a, #1a0a0a);
+    border: 3px solid transparent;
+    background-clip: padding-box;
+    border-radius: 24px;
+    padding: 48px 40px;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .cert-container::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(135deg, var(--saffron), var(--green), var(--blue), var(--purple));
+    border-radius: 26px;
+    z-index: -1;
+  }
+  .cert-seal {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--saffron), var(--yellow));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    margin: 0 auto 20px;
+    animation: glow-pulse 2s ease infinite;
+  }
+
+  .confetti-piece {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    animation: confetti-fall linear forwards;
+    z-index: 999;
+    pointer-events: none;
+  }
+
+  .tab-nav {
+    display: flex;
+    gap: 4px;
+    background: #0d0d1a;
+    border-radius: 16px;
+    padding: 4px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border-radius: 12px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s;
+    letter-spacing: .5px;
+  }
+  .tab-btn.active { background: var(--saffron); color: var(--ink); }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: .5px;
+  }
+  .badge-saffron { background: var(--saffron-glow); color: var(--saffron); border: 1px solid var(--saffron); }
+  .badge-green { background: var(--green-glow); color: var(--green); border: 1px solid var(--green); }
+  .badge-blue { background: rgba(74,158,255,.15); color: var(--blue); border: 1px solid var(--blue); }
+  .badge-purple { background: rgba(176,106,255,.15); color: var(--purple); border: 1px solid var(--purple); }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--card-border);
+    border-top-color: var(--saffron);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+    margin: 0 auto;
+  }
+
+  .shimmer {
+    background: linear-gradient(90deg, #1a1a2e 25%, #252540 50%, #1a1a2e 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 8px;
+  }
+
+  .hero-headline {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(36px, 6vw, 72px);
+    line-height: 1.05;
+    letter-spacing: -1px;
+  }
+  .gradient-text {
+    background: linear-gradient(90deg, var(--saffron), var(--yellow), var(--green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width:640px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  /* ── VICE CITY GAME EMBED ── */
+  #vc-game-root { background: #0a0a0f; font-family: 'Share Tech Mono', monospace; }
+  .vc-font { font-family: 'Orbitron', monospace; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+const GEMINI_KEY = "AIzaSyBzd83MbWtpsUfM520qxloauhhQx1F5C_M";
+const BACKEND_URL = "http://localhost:8000";
+
+const PHASES_META = [
+  { id: 1, title: "Voter Registration", subtitle: "Forms 6 & 8", emoji: "🗳️", color: "#ff6b1a" },
+  { id: 2, title: "Nomination & Scrutiny", subtitle: "Affidavits & Candidacy", emoji: "📜", color: "#4a9eff" },
+  { id: 3, title: "Model Code of Conduct", subtitle: "Ethics & Silence Period", emoji: "⚖️", color: "#b06aff" },
+  { id: 4, title: "Polling Day", subtitle: "Booth Protocols", emoji: "☑️", color: "#00c896" },
+  { id: 5, title: "Counting & Result", subtitle: "From Votes to Victory", emoji: "📊", color: "#ffe135" },
+];
+
+const FALLBACK_CONTENT = {
+  1: {
+    learn: { headline: "🗳️ Your Vote, Your Voice — Register Now!", body: "To vote in Indian elections, you must be registered on the Electoral Roll. Fill Form 6 to register as a new voter (you must be 18+ as of Jan 1 of the qualification year). Already registered but moved? Use Form 8 to update your details. After verification, you'll receive your EPIC (Electoral Photo Identity Card) — the golden ticket to democracy! Registration can now be done online at voters.eci.gov.in." },
+    watch: { title: "📱 Form 6 in 60 Seconds!", voiceover_script: "Hey! First-time voter? Here's the deal — if you're 18 and an Indian citizen, you DESERVE to vote. But first, you gotta register! Head to voters.eci.gov.in, fill Form 6, upload your docs, and you're in the system. Got an old address? Form 8 is your best friend. Your EPIC card arrives in 4-6 weeks. Don't sleep on this — democracy needs YOU!", thumbnail_text: "Register to Vote in 5 Minutes! 🔥" },
+    quiz: { question: "Which form should a first-time voter fill to get registered on the Electoral Roll?", options: ["Option A: Form 6", "Option B: Form 7", "Option C: Form 8", "Option D: Form 9"], correct_index: 0, explanation: "Form 6 is the application for inclusion of name in Electoral Roll for new voters. Form 8 is used for correction/shifting of entry. Form 7 is for deletion of entry." },
+    fun_fact: "Did you know... India's electoral roll is the world's largest voter database — with over 950 million registered voters!"
+  },
+  2: {
+    learn: { headline: "📜 Want to Stand for Election? Here's How!", body: "Any Indian citizen can contest elections! First, collect a nomination paper from the Returning Officer and file it with supporting affidavits disclosing assets, liabilities, and any criminal cases. The Returning Officer scrutinizes all papers. If your papers are valid, you're officially a candidate." },
+    watch: { title: "🎯 How to Become a Candidate!", voiceover_script: "So you want to change the system from the inside? Respect! Here's how to run for office in India. Pick up your nomination form from the Returning Officer, disclose EVERYTHING — assets, criminal record (if any) — in your affidavit. No hiding!", thumbnail_text: "Run for Office — Your Complete Guide 🏛️" },
+    quiz: { question: "By what date must a candidate disclose their criminal antecedents, assets, and liabilities?", options: ["Option A: After winning the election", "Option B: At the time of filing nomination", "Option C: On the day of polling", "Option D: Within 30 days of election result"], correct_index: 1, explanation: "The Supreme Court mandated that candidates MUST disclose criminal antecedents, assets/liabilities, and educational qualifications at the time of filing nomination papers." },
+    fun_fact: "Did you know... The security deposit for a Lok Sabha candidate is ₹25,000 (₹12,500 for SC/ST candidates)!"
+  },
+  3: {
+    learn: { headline: "⚖️ MCC — The Rules Every Party Must Follow!", body: "The Model Code of Conduct (MCC) kicks in the moment election dates are announced. Key rules: No party can use government resources for campaigning, no inflammatory speeches, no bribing voters. The famous 48-hour 'silence period' starts 48 hours before polling begins." },
+    watch: { title: "🤫 The 48-Hour Silence Rule Explained!", voiceover_script: "Imagine elections without the chaos of last-minute campaign drama. That's what the MCC's 48-hour silence period creates! No rallies, no speeches, no WhatsApp forwards from parties — nothing!", thumbnail_text: "The Rule That Silences Politicians 🤫" },
+    quiz: { question: "How many hours before the close of polling must election campaigning completely stop?", options: ["Option A: 24 hours", "Option B: 36 hours", "Option C: 48 hours", "Option D: 72 hours"], correct_index: 2, explanation: "Section 126 of the Representation of the People Act, 1951 prohibits campaigning within 48 hours of the close of polling." },
+    fun_fact: "Did you know... The Model Code of Conduct is not a law — it's a voluntary code enforced by the moral authority of the ECI!"
+  },
+  4: {
+    learn: { headline: "☑️ Polling Day — Your 7-Step Voting Guide!", body: "Arrive at your assigned booth. Carry your EPIC card or any of the 12 approved alternative IDs. The Presiding Officer verifies your identity, applies indelible ink on your left index finger, and issues a voter slip. You then proceed to the EVM and press the button next to your candidate — the EVM beeps confirming your vote. A VVPAT paper slip appears for exactly 7 seconds." },
+    watch: { title: "🖲️ How an EVM Actually Works!", voiceover_script: "Polling day energy — let's go! Walk into your booth, show your ID, get that ink on your finger. Then it's just you and the EVM. Press your candidate's button. Beep! Your vote is cast. The VVPAT machine shows you a paper slip for EXACTLY 7 seconds!", thumbnail_text: "Inside a Real Polling Booth 🗳️" },
+    quiz: { question: "For how many seconds does the VVPAT paper slip remain visible to the voter for verification?", options: ["Option A: 3 seconds", "Option B: 5 seconds", "Option C: 7 seconds", "Option D: 10 seconds"], correct_index: 2, explanation: "As per ECI specifications, the VVPAT paper slip is displayed for exactly 7 seconds before it drops into a sealed transparent box." },
+    fun_fact: "Did you know... The indelible ink used during Indian elections contains silver nitrate and stays for 2-4 weeks!"
+  },
+  5: {
+    learn: { headline: "📊 How Your Vote Gets Counted — Step by Step!", body: "Counting begins at a designated Counting Centre. First: Postal Ballots are counted. Then: EVM results are tabulated round by round. Finally: Random VVPAT verification — 5 randomly selected VVPATs per Assembly Constituency are physically matched against EVM counts." },
+    watch: { title: "🏆 From Votes to Victory — Counting Day!", voiceover_script: "Counting day is electric! Here's the order: postal ballots first. Then the EVMs are opened one by one, round by round. 5 random VVPATs from each constituency are opened and physically counted to verify the EVM numbers match.", thumbnail_text: "Inside India's Election Counting Room 🏆" },
+    quiz: { question: "As per ECI mandate, how many VVPATs are randomly selected for physical verification per Assembly Constituency during counting?", options: ["Option A: 1 VVPAT", "Option B: 3 VVPATs", "Option C: 5 VVPATs", "Option D: 10 VVPATs"], correct_index: 2, explanation: "The Supreme Court directed that 5 randomly selected VVPATs per Assembly Constituency must be physically counted and matched with EVM results during every election." },
+    fun_fact: "Did you know... In the 2024 Lok Sabha elections, over 1 million EVMs were deployed across 10.5 lakh polling stations!"
+  }
+};
+
+// ══════════════════════════════════════════
+// VICE CITY GAME COMPONENT (inline)
+// ══════════════════════════════════════════
+function ViceCityGame({ onClose }) {
+  const canvasRef = useRef(null);
+  const [gs, setGs] = useState({ chapter: -1, rep: 0, knowledge: 0, wanted: 0, day: 1, choices: [], evmVoted: false });
+  const [phase, setPhase] = useState('title'); // title | game | end
+  const [feedback, setFeedback] = useState(null);
+  const [aiText, setAiText] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [showNext, setShowNext] = useState(false);
+  const [vvpatCountdown, setVvpatCountdown] = useState(null);
+
+  const chapters = [
+    { id:1, title:"MISSION 1: BACK ON THE STREETS", sub:"Registration is power", day:1, loc:"LITTLE HAVANA — TOMMY'S HOOD", npc:{av:"RO",nm:"ROSIE",role:"TOMMY'S CONTACT",bg:"#2a1a00"}, speech:"Tommy, you just got out and already you're useless. Election's in 7 days — Sonny's got his boy Harris running for Mayor. You ain't even registered to vote, are ya? Start there. The registrar's office is open till midnight.", choices:[{t:"Head to the registrar. Register to vote tonight.",delta:{rep:15,know:20},good:true,fb:"MISSION COMPLETE. Registration is your entry ticket — no registration, no voice."},{t:"Tell Rosie voting is rigged anyway.",delta:{rep:-10,know:0},good:false,fb:"BUSTED. Sonny's counting on people thinking that."},{t:"Ask what the registration deadline actually is.",delta:{rep:10,know:25},good:true,fb:"SMART MOVE. Deadline is 30 days before the election. You need ID and your address."}] },
+    { id:2, title:"MISSION 2: THE DEBATES DON'T LIE", sub:"Know your candidates", day:3, loc:"VICE CITY CONVENTION CENTER", npc:{av:"KP",nm:"KENT PAUL",role:"JOURNALIST — VCNEWS",bg:"#001a14"}, speech:"Tommy! You watching the debate? Harris is promising a new stadium — paid for by YOUR taxes. Rivera's talking about fixing the water system in your neighborhood. Know the difference before you mark that ballot.", choices:[{t:"Watch the full debate. Research both platforms.",delta:{rep:20,know:30},good:true,fb:"MISSION COMPLETE. Harris gets money from Sonny's real estate company. Rivera is funded by the teachers' union."},{t:"Only listen to Harris — he sounds more confident.",delta:{rep:0,know:5},good:false,fb:"DANGEROUS PLAY. Charisma isn't policy."},{t:"Look up both candidates' voting records online.",delta:{rep:15,know:35},good:true,fb:"CLEAN MOVE. Past actions predict future ones — always check the record."}] },
+    { id:3, title:"MISSION 3: DISINFORMATION BOULEVARD", sub:"Don't let them play you", day:5, loc:"OCEAN DRIVE — TOMMY'S CAR", npc:{av:"LC",nm:"LANCE",role:"TOMMY'S PARTNER",bg:"#1a0010"}, speech:"Yo Tommy, someone texted me saying the election got CANCELLED because of fraud. My cousin already decided not to vote. This stinks like Sonny's crew to me, man.", choices:[{t:"Tell Lance to check the official election commission website.",delta:{rep:20,know:25},good:true,fb:"WISE MOVE. The city site confirms: election ON, Rivera ON ballot. Official sources only."},{t:"Forward the text to everyone — better safe than sorry.",delta:{rep:-25,know:0},good:false,fb:"YOU GOT PLAYED. You just became Sonny's unpaid propaganda agent."},{t:"Call the voter hotline to verify, then correct the record.",delta:{rep:30,know:20},good:true,fb:"HERO MOVE. You countered a voter suppression campaign. This is civic action."}] },
+    { id:4, title:"MISSION 4: ELECTION DAY", sub:"This is what it's all for", day:7, loc:"POLLING STATION #7 — LITTLE HAVANA", npc:{av:"PW",nm:"POLL WORKER",role:"OFFICIAL STATION STAFF",bg:"#001500"}, speech:"Mr. Vega, I'll need your voter registration confirmation or a valid photo ID. Once I check you in, you'll get your official ballot. Private booth — no cameras, no phones. Take your time. This is your constitutional right.", choices:[{t:"Show ID, check in properly, read the FULL ballot, then vote.",delta:{rep:30,know:20},good:true,fb:"MISSION COMPLETE. You noticed ballot measures for school funding below the mayor's race. A complete ballot."},{t:"Try to photo your marked ballot for proof.",delta:{rep:-10,know:5},good:false,fb:"BUSTED. Photographing marked ballots is illegal in most states."},{t:"Rush through — just mark the mayor and leave.",delta:{rep:10,know:10},good:false,fb:"YOU MISSED SOMETHING. Three more measures on the ballot. A rushed vote is an incomplete vote."}] }
+  ];
+
+  const currentChapter = gs.chapter >= 0 && gs.chapter < chapters.length ? chapters[gs.chapter] : null;
+
+  useEffect(() => {
+    if (canvasRef.current && currentChapter) drawScene(currentChapter.id);
+  }, [gs.chapter]);
+
+  function drawScene(chId) {
+    const c = canvasRef.current; if(!c) return;
+    const ctx = c.getContext('2d');
+    const W = c.width = c.offsetWidth || 680, H = 160;
+    c.height = H;
+    const palettes = {
+      1:{sky:'#080810',road:'#ff6ec7'},
+      2:{sky:'#050818',road:'#00ffcc'},
+      3:{sky:'#100508',road:'#ff3388'},
+      4:{sky:'#050f05',road:'#00ff88'}
+    };
+    const pal = palettes[chId] || palettes[1];
+    ctx.fillStyle = pal.sky; ctx.fillRect(0,0,W,H);
+    const bldgs = [
+      {x:0,w:70,h:80,fill:'#1a0a05'},{x:75,w:90,h:110,fill:'#120820'},
+      {x:175,w:55,h:70,fill:'#0a1520'},{x:240,w:120,h:130,fill:'#150515'},
+      {x:370,w:80,h:90,fill:'#0a1a0a'},{x:460,w:60,h:75,fill:'#1a1505'},
+      {x:530,w:100,h:100,fill:'#10101a'},{x:640,w:80,h:85,fill:'#1a0505'}
+    ];
+    bldgs.forEach(b=>{
+      ctx.fillStyle=b.fill; ctx.fillRect(b.x,H-b.h,b.w,b.h);
+      ctx.strokeStyle=pal.road+'44'; ctx.lineWidth=0.5; ctx.strokeRect(b.x,H-b.h,b.w,b.h);
+      for(let i=0;i<3;i++) for(let j=0;j<4;j++){
+        ctx.fillStyle=Math.random()>0.4?pal.road+'33':'#0d0d1a';
+        ctx.fillRect(b.x+5+i*20,H-b.h+8+j*18,8,10);
+      }
+    });
+    ctx.fillStyle='#111'; ctx.fillRect(0,H-18,W,18);
+    ctx.strokeStyle=pal.road; ctx.lineWidth=1; ctx.strokeRect(0,H-1,W,1);
+    ctx.fillStyle='#1a0a0a'; ctx.fillRect(40,H-18,50,18);
+    ctx.strokeStyle='#ff6ec7'; ctx.lineWidth=1; ctx.strokeRect(40,H-18,50,18);
+    ctx.font='bold 7px Orbitron,monospace'; ctx.fillStyle='#ff6ec7'; ctx.textAlign='left';
+    ctx.fillText(currentChapter?.loc?.split('—')[0]||'VICE CITY',12,H-6);
+  }
+
+  async function pickChoice(chapIdx, choiceIdx) {
+    const ch = chapters[chapIdx];
+    const c = ch.choices[choiceIdx];
+    setGs(prev => ({
+      ...prev,
+      rep: Math.max(0, Math.min(100, prev.rep + c.delta.rep)),
+      knowledge: Math.min(100, prev.knowledge + c.delta.know),
+      wanted: c.good ? prev.wanted : Math.min(3, prev.wanted + 1),
+      choices: [...prev.choices, {good: c.good}]
+    }));
+    setFeedback({text: c.fb, good: c.good});
+    setAiLoading(true);
+    try {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts:[{text:`GTA Vice City election game. Tommy Vega chose: "${c.t}". Result: ${c.good?'good civic choice':'bad choice'}. Write 2 gritty noir sentences (max 30 words). Vice City street language. Tease next mission.`}]}],generationConfig:{maxOutputTokens:60,temperature:0.9}})
+      });
+      const d = await r.json();
+      setAiText(d.candidates?.[0]?.content?.parts?.[0]?.text || '');
+    } catch(e) { setAiText(''); }
+    setAiLoading(false);
+    setShowNext(true);
+  }
+
+  function nextChapter() {
+    setFeedback(null); setAiText(''); setShowNext(false);
+    if (gs.chapter + 1 >= chapters.length) {
+      setPhase('end');
+    } else {
+      setGs(prev => ({...prev, chapter: prev.chapter + 1, day: chapters[prev.chapter + 1]?.day || prev.day}));
+    }
+  }
+
+  function startGame() {
+    setGs({ chapter: 0, rep: 0, knowledge: 0, wanted: 0, day: 1, choices: [] });
+    setPhase('game'); setFeedback(null); setAiText(''); setShowNext(false);
+  }
+
+  const total = gs.rep + gs.knowledge;
+  const pct = Math.round((total / 200) * 100);
+  let rank = pct >= 80 ? 'LEGEND OF VICE CITY' : pct >= 55 ? 'STREET SOLDIER' : 'SMALL TIME';
+
+  return (
+    <div style={{background:'#0a0a1a',minHeight:'500px',color:'#fff',fontFamily:"'Share Tech Mono',monospace"}}>
+      {/* Header */}
+      <div style={{background:'#000',padding:'10px 14px',display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px solid #ff6ec7'}}>
+        <div style={{fontFamily:'Orbitron,monospace',fontSize:14,fontWeight:700,color:'#ff6ec7',letterSpacing:2}}>VOTE CITY</div>
+        {phase==='game' && (
+          <div style={{display:'flex',gap:16,alignItems:'center'}}>
+            <div style={{textAlign:'center'}}>
+              <div style={{fontSize:9,color:'#ff6ec7',letterSpacing:1}}>REP</div>
+              <div style={{fontFamily:'Orbitron,monospace',fontSize:12,color:'#ff6ec7'}}>{gs.rep}</div>
+            </div>
+            <div style={{textAlign:'center'}}>
+              <div style={{fontSize:9,color:'#00ffcc',letterSpacing:1}}>KNOW</div>
+              <div style={{fontFamily:'Orbitron,monospace',fontSize:12,color:'#00ffcc'}}>{gs.knowledge}</div>
+            </div>
+            <div style={{fontSize:9,color:'#555'}}>DAY {gs.day}/7</div>
+          </div>
+        )}
+      </div>
+
+      {phase === 'title' && (
+        <div style={{textAlign:'center',padding:'2rem 1rem'}}>
+          <div style={{fontFamily:'Orbitron,monospace',fontSize:28,fontWeight:900,color:'#ff6ec7',letterSpacing:4,marginBottom:8}}>VOTE CITY</div>
+          <div style={{fontFamily:'Orbitron,monospace',fontSize:11,color:'#00ffcc',letterSpacing:6,marginBottom:16}}>ELECTION STORY MODE</div>
+          <p style={{fontSize:12,color:'#666',maxWidth:380,margin:'0 auto 24px',lineHeight:1.8}}>
+            You are TOMMY VEGA — just got out, rolling into Vice City. Election's in 7 days. Corrupt boss SONNY CORRADO wants his puppet Mayor HARRIS in power. Navigate it all — register, research, fight disinfo, vote.
+          </p>
+          <button onClick={startGame} style={{background:'none',border:'2px solid #ff6ec7',color:'#ff6ec7',fontFamily:'Orbitron,monospace',fontSize:11,fontWeight:700,letterSpacing:4,padding:'12px 28px',cursor:'pointer'}}>[ BEGIN MISSION ]</button>
+        </div>
+      )}
+
+      {phase === 'game' && currentChapter && (
+        <div>
+          <canvas ref={canvasRef} style={{width:'100%',height:160,display:'block',background:'#0a0f0a'}} />
+          <div style={{background:'#000',borderTop:'2px solid #ff6ec7',padding:'8px 14px'}}>
+            <div style={{fontFamily:'Orbitron,monospace',fontSize:9,color:'#555',letterSpacing:3,marginBottom:4}}>CHAPTER {gs.chapter+1}/4 · {currentChapter.title}</div>
+            <div style={{display:'flex',gap:8,alignItems:'flex-start'}}>
+              <div style={{width:36,height:36,borderRadius:4,border:'1px solid #ff6ec7',background:currentChapter.npc.bg,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700,color:'#ff6ec7',fontFamily:'Orbitron,monospace',flexShrink:0}}>{currentChapter.npc.av}</div>
+              <div>
+                <div style={{fontFamily:'Orbitron,monospace',fontSize:9,color:'#ff6ec7',letterSpacing:2}}>{currentChapter.npc.nm}</div>
+                <div style={{fontSize:8,color:'#444',marginBottom:4}}>{currentChapter.npc.role}</div>
+                <div style={{fontSize:11,color:'#ddd',lineHeight:1.7}}>{currentChapter.speech}</div>
+              </div>
+            </div>
+          </div>
+          {feedback && (
+            <div style={{padding:'10px 14px',fontSize:11,lineHeight:1.7,background:feedback.good?'#000f05':'#0f0000',borderTop:`2px solid ${feedback.good?'#00ff88':'#ff3333'}`,color:feedback.good?'#00ff88':'#ff4444'}}>
+              <strong style={{fontFamily:'Orbitron,monospace',fontSize:9,letterSpacing:2}}>{feedback.good?'✓ MISSION UPDATE':'✗ HEAT LEVEL UP'}</strong><br/><br/>
+              {feedback.text}
+              {aiText && <div style={{marginTop:8,color:'#ff6ec7',fontStyle:'italic',fontSize:10}}>{aiText}</div>}
+              {aiLoading && <div style={{color:'#ff6ec7',fontSize:10,marginTop:4}}>Generating story beat...</div>}
+            </div>
+          )}
+          {!feedback && (
+            <div style={{background:'#06060f',padding:'10px 14px',borderTop:'1px solid #1a1a2a'}}>
+              {currentChapter.choices.map((c, i) => (
+                <div key={i} onClick={() => pickChoice(gs.chapter, i)} style={{display:'flex',alignItems:'center',gap:8,padding:'9px 10px',marginBottom:6,border:'1px solid #222',borderRadius:3,cursor:'pointer',background:'#0a0a18',transition:'all .15s'}}
+                  onMouseEnter={e=>{e.currentTarget.style.borderColor='#ff6ec7';e.currentTarget.style.background='#1a0010';}}
+                  onMouseLeave={e=>{e.currentTarget.style.borderColor='#222';e.currentTarget.style.background='#0a0a18';}}>
+                  <div style={{width:22,height:22,borderRadius:3,background:'#ff6ec7',color:'#000',fontSize:10,fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,fontFamily:'Orbitron,monospace'}}>{String.fromCharCode(65+i)}</div>
+                  <div style={{fontSize:12,color:'#ccc'}}>{c.t}</div>
+                </div>
+              ))}
+            </div>
+          )}
+          {showNext && (
+            <div style={{padding:'0 14px 14px'}}>
+              <button onClick={nextChapter} style={{display:'block',width:'100%',padding:10,background:'#ff6ec7',color:'#000',fontFamily:'Orbitron,monospace',fontSize:11,fontWeight:700,letterSpacing:3,border:'none',cursor:'pointer'}}>
+                {gs.chapter + 1 < chapters.length ? '[ NEXT MISSION ]' : '[ SEE YOUR ENDING ]'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {phase === 'end' && (
+        <div style={{textAlign:'center',padding:'2rem 1rem'}}>
+          <div style={{width:80,height:80,borderRadius:'50%',background:'#001a08',border:'2px solid #ffcc00',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 12px',fontSize:28}}>🗳️</div>
+          <div style={{fontFamily:'Orbitron,monospace',fontSize:20,fontWeight:900,color:'#ffcc00',letterSpacing:3,marginBottom:8}}>{rank}</div>
+          <div style={{fontFamily:'Orbitron,monospace',fontSize:11,color:'#00ffcc',letterSpacing:2,marginBottom:16}}>REP: {gs.rep} / KNOWLEDGE: {gs.knowledge} / SCORE: {pct}%</div>
+          <button onClick={startGame} style={{background:'none',border:'2px solid #ff6ec7',color:'#ff6ec7',fontFamily:'Orbitron,monospace',fontSize:11,fontWeight:700,letterSpacing:4,padding:'10px 24px',cursor:'pointer',marginRight:8}}>[ PLAY AGAIN ]</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════
+// CIVIC SCORE CALCULATOR
+// ══════════════════════════════════════════
+function CivicScoreCalc({ onClose }) {
+  const questions = [
+    { q: "Are you registered to vote?", opts: ["Yes, registered", "Not yet", "Don't know", "Not eligible"], scores: [20, 0, 5, 10], color: 'saffron' },
+    { q: "Have you voted in the last election?", opts: ["Yes, voted", "Missed it", "First-time voter", "Was too young"], scores: [25, 0, 15, 10], color: 'green' },
+    { q: "How do you research candidates?", opts: ["Full policy research", "News headlines", "Social media", "I don't research"], scores: [20, 12, 5, 0], color: 'blue' },
+    { q: "Do you know your constituency & candidate names?", opts: ["Yes, both", "Constituency only", "Neither", "Vaguely"], scores: [15, 8, 0, 5], color: 'saffron' },
+    { q: "Do you fact-check election news before sharing?", opts: ["Always", "Sometimes", "Rarely", "Never"], scores: [15, 8, 3, 0], color: 'green' },
+    { q: "Do you know what NOTA means?", opts: ["Yes — None Of The Above", "Heard of it", "No idea", "Partially"], scores: [5, 3, 0, 2], color: 'blue' },
+  ];
+
+  const [answers, setAnswers] = useState({});
+  const [result, setResult] = useState(null);
+  const [aiDebrief, setAiDebrief] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const total = 100;
+  const answered = Object.keys(answers).length;
+  const currentScore = Object.entries(answers).reduce((sum, [qi, oi]) => sum + (questions[parseInt(qi)]?.scores[parseInt(oi)] || 0), 0);
+
+  async function calcResult() {
+    const score = currentScore;
+    let rank, color, msg;
+    if (score >= 80) { rank = "Civic Champion 🏆"; color = "#00ffcc"; msg = "You are an informed, active participant in democracy. Exceptional civic awareness!"; }
+    else if (score >= 60) { rank = "Engaged Citizen 🗳️"; color = "#4a9eff"; msg = "You're doing well! A few areas to sharpen — candidate research and fact-checking."; }
+    else if (score >= 35) { rank = "Civic Learner 📖"; color = "#ff6b1a"; msg = "Good start! Focus on registration, research, and verifying election news."; }
+    else { rank = "Democracy Rookie 🌱"; color = "#b06aff"; msg = "Everyone starts somewhere! The MatAdhikar curriculum is exactly what you need."; }
+    setResult({ score, rank, color, msg });
+    setAiLoading(true);
+    try {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts:[{text:`Civic score calculator result. User scored ${score}/100 on Indian election civic awareness quiz. Rank: ${rank}. Write a warm, specific 2-sentence personalized debrief. Mention 1 strength and 1 thing to improve. End with an encouraging line about Indian democracy. Max 50 words.`}]}],generationConfig:{maxOutputTokens:80,temperature:0.8}})
+      });
+      const d = await r.json();
+      setAiDebrief(d.candidates?.[0]?.content?.parts?.[0]?.text || '');
+    } catch(e) {}
+    setAiLoading(false);
+  }
+
+  const colorMap = { saffron: 'var(--saffron)', green: 'var(--green)', blue: 'var(--blue)' };
+
+  return (
+    <div style={{background:'var(--card-bg)',borderRadius:20,overflow:'hidden'}}>
+      {/* Header */}
+      <div style={{background:'linear-gradient(135deg,#001a0a,#0a1a1a)',padding:'20px 24px',borderBottom:'1px solid var(--card-border)'}}>
+        <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:6}}>
+          <div style={{width:40,height:40,borderRadius:'50%',background:'linear-gradient(135deg,var(--green),var(--blue))',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20}}>📊</div>
+          <div>
+            <div style={{fontFamily:'Orbitron,monospace',fontSize:13,fontWeight:700,color:'#00ffcc',letterSpacing:2}}>CIVIC SCORE CALCULATOR</div>
+            <div style={{fontSize:11,color:'var(--muted)'}}>Powered by Gemini AI · Indian Elections</div>
+          </div>
+        </div>
+        {/* Live score bar */}
+        <div style={{marginTop:12}}>
+          <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+            <span style={{fontSize:11,color:'var(--muted)'}}>Live Score</span>
+            <span style={{fontFamily:'Orbitron,monospace',fontSize:13,fontWeight:700,color:'#00ffcc'}}>{currentScore} / 100</span>
+          </div>
+          <div className="progress-bar-bg">
+            <div className="progress-bar-fill" style={{width:`${currentScore}%`,background:'linear-gradient(90deg,#00c896,#4a9eff)'}} />
+          </div>
+          <div style={{fontSize:10,color:'var(--muted)',marginTop:4}}>{answered}/{questions.length} questions answered</div>
+        </div>
+      </div>
+
+      <div style={{padding:'20px 24px',maxHeight:'55vh',overflowY:'auto'}}>
+        {!result ? (
+          <>
+            {questions.map((q, qi) => (
+              <div key={qi} className="score-question">
+                <div className="score-q-text">
+                  <span style={{fontFamily:'Space Mono',fontSize:10,color:colorMap[q.color],marginRight:8}}>Q{qi+1}</span>
+                  {q.q}
+                </div>
+                <div className="score-options">
+                  {q.opts.map((opt, oi) => (
+                    <button key={oi}
+                      className={`score-opt ${answers[qi] === oi ? `selected-${q.color === 'saffron' ? '' : q.color}`.replace('selected-','selected') : ''}`}
+                      style={answers[qi] === oi ? {borderColor: colorMap[q.color], background: colorMap[q.color]+'22', color: colorMap[q.color], fontWeight:700} : {}}
+                      onClick={() => setAnswers(prev => ({...prev, [qi]: oi}))}>
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+            <button
+              className="btn-green"
+              disabled={answered < questions.length}
+              onClick={calcResult}
+              style={{width:'100%',marginTop:8,opacity:answered<questions.length?0.4:1}}>
+              {answered < questions.length ? `Answer all ${questions.length - answered} remaining →` : '✨ Calculate My Civic Score →'}
+            </button>
+          </>
+        ) : (
+          <div style={{textAlign:'center'}}>
+            {/* Donut score */}
+            <div style={{position:'relative',width:120,height:120,margin:'0 auto 20px'}}>
+              <svg width="120" height="120" viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="50" fill="none" stroke="#1a1a2e" strokeWidth="10"/>
+                <circle cx="60" cy="60" r="50" fill="none" stroke={result.color} strokeWidth="10"
+                  strokeDasharray={`${result.score * 3.14} 314`}
+                  strokeLinecap="round"
+                  transform="rotate(-90 60 60)"
+                  style={{transition:'stroke-dasharray 1s ease'}}/>
+              </svg>
+              <div style={{position:'absolute',inset:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
+                <div style={{fontFamily:'Orbitron,monospace',fontSize:22,fontWeight:900,color:result.color}}>{result.score}</div>
+                <div style={{fontSize:9,color:'var(--muted)'}}>/ 100</div>
+              </div>
+            </div>
+            <div style={{fontFamily:'Syne,sans-serif',fontSize:20,fontWeight:800,color:result.color,marginBottom:8}}>{result.rank}</div>
+            <p style={{fontSize:13,color:'#ccc',lineHeight:1.7,marginBottom:16}}>{result.msg}</p>
+            {/* Score breakdown */}
+            <div style={{textAlign:'left',marginBottom:16}}>
+              {questions.map((q, qi) => answers[qi] !== undefined && (
+                <div key={qi} style={{marginBottom:8}}>
+                  <div style={{display:'flex',justifyContent:'space-between',fontSize:11,marginBottom:3}}>
+                    <span style={{color:'var(--muted)'}}>{q.q.split('?')[0]}?</span>
+                    <span style={{color:colorMap[q.color],fontFamily:'Space Mono',fontWeight:700}}>+{q.scores[answers[qi]]}</span>
+                  </div>
+                  <div className="score-result-bar">
+                    <div className="score-result-fill" style={{width:`${(q.scores[answers[qi]]/Math.max(...q.scores))*100}%`,background:colorMap[q.color]}} />
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* AI Debrief */}
+            {aiLoading && <div className="spinner" style={{width:28,height:28,margin:'12px auto'}}/>}
+            {aiDebrief && (
+              <div style={{background:'rgba(0,200,150,0.08)',border:'1px solid var(--green)',borderRadius:12,padding:'14px 16px',marginBottom:16,textAlign:'left',borderLeft:'3px solid var(--green)'}}>
+                <div style={{fontSize:10,color:'var(--green)',fontFamily:'Space Mono',letterSpacing:1,marginBottom:6}}>🤖 AI DEBRIEF</div>
+                <p style={{fontSize:13,color:'#ccc',lineHeight:1.7}}>{aiDebrief}</p>
+              </div>
+            )}
+            <div style={{display:'flex',gap:8,justifyContent:'center',flexWrap:'wrap'}}>
+              <button className="btn-primary" onClick={() => { setResult(null); setAnswers({}); setAiDebrief(''); }}>Recalculate →</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════
+// ORIGINAL COMPONENTS (unchanged)
+// ══════════════════════════════════════════
+function TickerBanner() {
+  const items = ["🗳️ MATADHIKAR","🇮🇳 KNOW YOUR VOTE","⚖️ ECI GUIDELINES","📜 CIVIC EDUCATION","🏛️ DEMOCRACY IN ACTION","☑️ YOUR VOTE MATTERS","🗳️ MATADHIKAR","🇮🇳 KNOW YOUR VOTE","⚖️ ECI GUIDELINES","📜 CIVIC EDUCATION","🏛️ DEMOCRACY IN ACTION","☑️ YOUR VOTE MATTERS"];
+  return <div className="ticker-wrap"><div className="ticker-inner">{items.map((item,i)=><span key={i} className="ticker-item">{item}</span>)}</div></div>;
+}
+
+function PhaseSidebar({ currentPhase, completedPhases }) {
+  return (
+    <div style={{ position: 'sticky', top: 20 }}>
+      <div style={{ fontFamily: 'Space Mono', fontSize: 10, color: 'var(--muted)', marginBottom: 12, letterSpacing: 2 }}>YOUR PROGRESS</div>
+      <div className="progress-bar-bg" style={{ marginBottom: 20 }}>
+        <div className="progress-bar-fill" style={{ width: `${(completedPhases.length / 5) * 100}%` }} />
+      </div>
+      {PHASES_META.map(p => (
+        <div key={p.id} className={`phase-step ${currentPhase === p.id ? 'active' : ''} ${completedPhases.includes(p.id) ? 'done' : ''}`}>
+          <span style={{ fontSize: 18 }}>{completedPhases.includes(p.id) ? '✅' : p.emoji}</span>
+          <span>{p.title}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ContentSkeleton() {
+  return (
+    <div style={{ padding: 4 }}>
+      <div className="shimmer" style={{ height: 32, marginBottom: 12, width: '70%' }} />
+      <div className="shimmer" style={{ height: 16, marginBottom: 8 }} />
+      <div className="shimmer" style={{ height: 16, marginBottom: 8, width: '90%' }} />
+      <div className="shimmer" style={{ height: 16, marginBottom: 24, width: '80%' }} />
+      <div className="shimmer" style={{ height: 48, marginBottom: 12, borderRadius: 12 }} />
+      <div className="shimmer" style={{ height: 48, marginBottom: 12, borderRadius: 12 }} />
+      <div className="shimmer" style={{ height: 48, borderRadius: 12 }} />
+    </div>
+  );
+}
+
+function LearnTab({ data }) {
+  return (
+    <div className="fade-in">
+      <h2 style={{ fontFamily: 'Syne', fontSize: 26, fontWeight: 800, lineHeight: 1.2, marginBottom: 20 }}>{data.headline}</h2>
+      <p style={{ fontSize: 15, lineHeight: 1.8, color: '#ccc' }}>{data.body}</p>
+    </div>
+  );
+}
+
+function WatchTab({ data }) {
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const intervalRef = useRef(null);
+  const handlePlay = () => {
+    if (playing) { clearInterval(intervalRef.current); setPlaying(false); return; }
+    setPlaying(true); setProgress(0);
+    intervalRef.current = setInterval(() => {
+      setProgress(p => { if (p >= 100) { clearInterval(intervalRef.current); setPlaying(false); return 100; } return p + 0.5; });
+    }, 150);
+  };
+  useEffect(() => () => clearInterval(intervalRef.current), []);
+  return (
+    <div className="fade-in">
+      <div style={{ background: 'linear-gradient(135deg,#1a0a2e,#0a1a3e)', borderRadius: 16, padding: '40px 24px', marginBottom: 24, border: '1px solid var(--card-border)', textAlign: 'center' }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>🎬</div>
+        <div style={{ fontFamily: 'Syne', fontSize: 18, fontWeight: 700, marginBottom: 8 }}>{data.title}</div>
+        <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 8, padding: '8px 16px', display: 'inline-block', fontSize: 12, color: 'var(--muted)', marginBottom: 20, fontFamily: 'Space Mono' }}>📺 {data.thumbnail_text}</div><br/>
+        <button className="btn-primary" onClick={handlePlay} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>{playing ? '⏸️ Pause' : '▶️ Play Demo'}</button>
+        {(playing || progress > 0) && <div style={{ marginTop: 20 }}><div className="progress-bar-bg" style={{ width: '80%', margin: '0 auto' }}><div className="progress-bar-fill" style={{ width: `${progress}%` }} /></div></div>}
+      </div>
+      <div style={{ background: '#0d1a0d', border: '1px solid #00c89633', borderRadius: 14, padding: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}><span className="badge badge-green">🎙️ AI VOICEOVER SCRIPT</span></div>
+        <p style={{ fontSize: 14, lineHeight: 1.8, color: '#aad', fontStyle: 'italic' }}>"{data.voiceover_script}"</p>
+      </div>
+    </div>
+  );
+}
+
+function QuizTab({ data, onCorrect }) {
+  const [selected, setSelected] = useState(null);
+  const [answered, setAnswered] = useState(false);
+  const handleSelect = (idx) => {
+    if (answered) return;
+    setSelected(idx); setAnswered(true);
+    if (idx === data.correct_index) setTimeout(onCorrect, 1200);
+  };
+  const isCorrect = selected === data.correct_index;
+  return (
+    <div className="fade-in">
+      <div style={{ marginBottom: 24 }}>
+        <span className="badge badge-purple" style={{ marginBottom: 16, display: 'inline-flex' }}>🧠 KNOWLEDGE CHECK</span>
+        <h3 style={{ fontFamily: 'Syne', fontSize: 18, fontWeight: 700, lineHeight: 1.4 }}>{data.question}</h3>
+      </div>
+      <div>
+        {data.options.map((opt, idx) => (
+          <button key={idx} className={`quiz-option ${answered && idx === data.correct_index ? 'correct' : ''} ${answered && idx === selected && !isCorrect ? 'wrong' : ''}`} onClick={() => handleSelect(idx)} disabled={answered}>
+            <span style={{ marginRight: 12, fontFamily: 'Space Mono', fontSize: 12, color: 'var(--muted)' }}>{['A','B','C','D'][idx]}</span>
+            {opt.replace(/^Option [ABCD]: /, '')}
+          </button>
+        ))}
+      </div>
+      {answered && (
+        <div className="fade-in" style={{ marginTop: 20, padding: '16px 20px', borderRadius: 14, background: isCorrect ? 'var(--green-glow)' : 'rgba(255,59,92,.15)', border: `1px solid ${isCorrect ? 'var(--green)' : 'var(--red)'}` }}>
+          <div style={{ fontWeight: 700, marginBottom: 6, color: isCorrect ? 'var(--green)' : 'var(--red)' }}>{isCorrect ? '✅ Correct!' : '❌ Not quite — the correct answer is highlighted above.'}</div>
+          <p style={{ fontSize: 13, color: '#ccc', lineHeight: 1.6 }}>{data.explanation}</p>
+          {!isCorrect && <button className="btn-ghost" style={{ marginTop: 12 }} onClick={() => { setSelected(null); setAnswered(false); }}>Try Again</button>}
+        </div>
+      )}
+      {!answered && <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 16, textAlign: 'center', fontFamily: 'Space Mono' }}>⚡ You must answer correctly to unlock the next phase</p>}
+    </div>
+  );
+}
+
+function LearningModule({ phase, onPhaseComplete, completedPhases }) {
+  const [activeTab, setActiveTab] = useState('learn');
+  const [content, setContent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [quizPassed, setQuizPassed] = useState(false);
+  const [backendAvailable, setBackendAvailable] = useState(true);
+  const phaseMeta = PHASES_META.find(p => p.id === phase);
+
+  useEffect(() => { setLoading(true); setContent(null); setError(null); setQuizPassed(false); setActiveTab('learn'); loadContent(); }, [phase]);
+
+  const loadContent = async () => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/generate-phase`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phase }), signal: AbortSignal.timeout(10000) });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setContent(data); setBackendAvailable(true);
+    } catch (err) {
+      setBackendAvailable(false);
+      const fb = FALLBACK_CONTENT[phase];
+      if (fb) setContent({ phase, phase_title: phaseMeta.title, phase_emoji: phaseMeta.emoji, ...fb });
+      else setError('Failed to load content.');
+    } finally { setLoading(false); }
+  };
+
+  return (
+    <div>
+      <div className="card" style={{ marginBottom: 20, borderColor: phaseMeta.color + '44' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ width: 56, height: 56, borderRadius: '50%', background: `${phaseMeta.color}22`, border: `2px solid ${phaseMeta.color}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>{phaseMeta.emoji}</div>
+          <div>
+            <div style={{ fontFamily: 'Space Mono', fontSize: 11, color: 'var(--muted)', letterSpacing: 2, marginBottom: 4 }}>PHASE {phase} / 5</div>
+            <div style={{ fontFamily: 'Syne', fontSize: 20, fontWeight: 800 }}>{phaseMeta.title}</div>
+            <div style={{ fontSize: 13, color: 'var(--muted)' }}>{phaseMeta.subtitle}</div>
+          </div>
+          {!backendAvailable && <span className="badge badge-saffron" style={{ marginLeft: 'auto' }}>📦 DEMO MODE</span>}
+        </div>
+      </div>
+      <div className="tab-nav" style={{ marginBottom: 24 }}>
+        {['learn','watch','quiz'].map(tab => <button key={tab} className={`tab-btn ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>{tab === 'learn' ? '📖 Learn' : tab === 'watch' ? '🎬 Watch' : '🧠 Quiz'}</button>)}
+      </div>
+      <div className="card" style={{ minHeight: 300, marginBottom: 24 }}>
+        {loading ? <ContentSkeleton /> : error ? <div style={{ textAlign: 'center', padding: 40 }}><p style={{ color: 'var(--red)' }}>{error}</p><button className="btn-ghost" onClick={loadContent}>Try Again</button></div> : content ? (
+          <>
+            {activeTab === 'learn' && <LearnTab data={content.learn} />}
+            {activeTab === 'watch' && <WatchTab data={content.watch} />}
+            {activeTab === 'quiz' && <QuizTab data={content.quiz} onCorrect={() => setQuizPassed(true)} />}
+          </>
+        ) : null}
+      </div>
+      {content?.fun_fact && (
+        <div className="card" style={{ marginBottom: 24, borderColor: 'var(--yellow)33', background: 'rgba(255,225,53,0.05)' }}>
+          <span className="badge" style={{ background: 'rgba(255,225,53,0.15)', color: 'var(--yellow)', border: '1px solid var(--yellow)', marginBottom: 10, display: 'inline-flex' }}>💡 FUN FACT</span>
+          <p style={{ fontSize: 14, color: '#ddd', lineHeight: 1.7 }}>{content.fun_fact}</p>
+        </div>
+      )}
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button className={quizPassed ? 'btn-green' : 'btn-primary'} disabled={!quizPassed} onClick={() => onPhaseComplete(phase)} style={{ opacity: quizPassed ? 1 : 0.4 }}>
+          {quizPassed ? (phase === 5 ? '🎮 Launch EVM Simulator →' : `Next: Phase ${phase + 1} →`) : '🔒 Pass the Quiz to Continue'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function EVMSimulator({ onComplete }) {
+  const [evmState, setEvmState] = useState('ready');
+  const [votedFor, setVotedFor] = useState(null);
+  const [vvpatCountdown, setVvpatCountdown] = useState(7);
+  const [countingPhase, setCountingPhase] = useState(0);
+  const [tally, setTally] = useState({ A: 0, B: 0, NOTA: 0 });
+  const candidates = [
+    { id:'A', name:'Candidate A', party:'Democratic Alliance', symbol:'🌸', color:'#ff6b1a' },
+    { id:'B', name:'Candidate B', party:'National Front', symbol:'⭐', color:'#4a9eff' },
+    { id:'NOTA', name:'NOTA', party:'None of the Above', symbol:'✖️', color:'#888' },
+  ];
+  const handleVote = (id) => {
+    if (evmState !== 'ready') return;
+    setVotedFor(id); setEvmState('voted'); setVvpatCountdown(7);
+    const interval = setInterval(() => {
+      setVvpatCountdown(c => { if (c <= 1) { clearInterval(interval); setEvmState('done'); setTally(prev => ({...prev, [id]: prev[id]+1})); return 0; } return c-1; });
+    }, 1000);
+  };
+  const handleStartCounting = () => {
+    setCountingPhase(1);
+    setTimeout(() => setCountingPhase(2), 2000);
+    setTimeout(() => setCountingPhase(3), 4000);
+    setTimeout(() => setCountingPhase(4), 6500);
+  };
+  const candidate = candidates.find(c => c.id === votedFor);
+  const countingStages = [
+    { id:1, label:"📬 Postal Ballots", desc:"Counting votes from service personnel & overseas electors" },
+    { id:2, label:"🖲️ EVM Tabulation", desc:"Reading vote counts from all Electronic Voting Machines" },
+    { id:3, label:"🔍 VVPAT Verification", desc:"Randomly selecting 5 VVPATs for physical count matching" },
+    { id:4, label:"🏆 Result Declaration", desc:"Returning Officer certifies and declares the winner" },
+  ];
+  return (
+    <div className="fade-in">
+      <div style={{ textAlign:'center', marginBottom:40 }}>
+        <span className="badge badge-green" style={{ marginBottom:16, display:'inline-flex' }}>🎮 CAPSTONE: EVM SIMULATOR</span>
+        <h2 className="hero-headline" style={{ fontSize:'clamp(28px,4vw,48px)', marginBottom:12 }}>Step Inside the <span className="gradient-text">Booth</span></h2>
+        <p style={{ color:'var(--muted)', fontSize:15 }}>Experience the complete voting process — just like election day!</p>
+      </div>
+      {(evmState === 'ready' || evmState === 'voted') && (
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:24 }}>
+          <div className="evm-machine">
+            <div style={{ textAlign:'center', marginBottom:20 }}>
+              <div style={{ fontFamily:'Space Mono', fontSize:10, color:'#4a9eff', letterSpacing:2, marginBottom:4 }}>ELECTION COMMISSION OF INDIA</div>
+              <div style={{ fontFamily:'Space Mono', fontSize:9, color:'#666' }}>ELECTRONIC VOTING MACHINE</div>
+            </div>
+            <div className="evm-screen">{evmState==='ready' ? <div><div style={{fontSize:11,marginBottom:4}}>READY TO VOTE</div><div style={{fontSize:24}}>▶</div><div style={{fontSize:10,marginTop:4,color:'#007700'}}>PRESS CANDIDATE BUTTON</div></div> : <div><div style={{fontSize:11,marginBottom:4,color:'#00ff00'}}>VOTE RECORDED ✓</div><div style={{fontSize:10}}>VVPAT PRINTING...</div></div>}</div>
+            {candidates.map(c => (
+              <button key={c.id} className="evm-btn" onClick={() => handleVote(c.id)} disabled={evmState!=='ready'}>
+                <div style={{ display:'flex', alignItems:'center', gap:12 }}><span style={{fontSize:20}}>{c.symbol}</span><div><div style={{fontWeight:700,fontSize:13}}>{c.name}</div><div style={{fontSize:11,color:'var(--muted)'}}>{c.party}</div></div></div>
+                <div className="evm-btn-circle" style={{ color:c.color, borderColor:c.color }}>{c.id}</div>
+              </button>
+            ))}
+            <div style={{ marginTop:16, padding:'10px 12px', background:'#0a1020', borderRadius:8, textAlign:'center' }}><span style={{ fontFamily:'Space Mono', fontSize:9, color:'#333' }}>BHARAT ELECTRONICS LIMITED</span></div>
+          </div>
+          {evmState==='voted' && candidate && (
+            <div className="vvpat-box">
+              <div style={{ fontFamily:'Space Mono', fontSize:10, color:'#8b6914', marginBottom:12, textAlign:'center', letterSpacing:1 }}>VVPAT — SLIP VISIBLE FOR {vvpatCountdown}s</div>
+              <div className="vvpat-slip emerging">
+                <div style={{ textAlign:'center', fontWeight:700, fontSize:12, marginBottom:8 }}>VOTER VERIFIABLE PAPER AUDIT TRAIL</div>
+                <div style={{ borderTop:'1px dashed #ccc', paddingTop:8, textAlign:'center' }}>
+                  <div style={{ fontSize:28 }}>{candidate.symbol}</div>
+                  <div style={{ fontWeight:700, fontSize:13 }}>{candidate.name}</div>
+                  <div style={{ fontSize:11, color:'#555' }}>{candidate.party}</div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      {evmState==='done' && !countingPhase && (
+        <div className="fade-in" style={{ textAlign:'center' }}>
+          <div className="card" style={{ maxWidth:400, margin:'0 auto 32px', borderColor:'var(--green)' }}>
+            <div style={{fontSize:48,marginBottom:16}}>✅</div>
+            <h3 style={{fontFamily:'Syne',fontSize:20,fontWeight:800,marginBottom:8}}>Vote Cast Successfully!</h3>
+            <p style={{color:'var(--muted)',fontSize:14,marginBottom:20}}>You voted for <strong style={{color:'var(--green)'}}>{candidate?.name}</strong>.</p>
+            <button className="btn-primary" onClick={handleStartCounting}>📊 Simulate Vote Counting →</button>
+          </div>
+        </div>
+      )}
+      {countingPhase > 0 && (
+        <div className="fade-in">
+          <h3 style={{fontFamily:'Syne',fontSize:22,fontWeight:800,textAlign:'center',marginBottom:24}}>📊 Live Counting Dashboard</h3>
+          <div style={{maxWidth:560,margin:'0 auto 32px'}}>
+            {countingStages.map(stage => (
+              <div key={stage.id} className={`count-stage ${countingPhase===stage.id?'active':''} ${countingPhase>stage.id?'done':''}`}>
+                <div style={{display:'flex',alignItems:'center',gap:12}}>
+                  <span style={{fontSize:20}}>{countingPhase>stage.id?'✅':countingPhase===stage.id?'⏳':'⭕'}</span>
+                  <div><div style={{fontFamily:'Syne',fontWeight:700,fontSize:15}}>{stage.label}</div><div style={{fontSize:12,color:'var(--muted)',marginTop:2}}>{stage.desc}</div></div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {countingPhase===4 && (
+            <div className="fade-in" style={{textAlign:'center'}}>
+              <div className="card" style={{maxWidth:400,margin:'0 auto 32px',borderColor:'var(--yellow)'}}>
+                <div style={{fontSize:40,marginBottom:12}}>🏆</div>
+                <div style={{fontFamily:'Syne',fontSize:16,fontWeight:800,color:'var(--yellow)',marginBottom:16}}>Result Declared!</div>
+                <div style={{display:'flex',justifyContent:'center',gap:16,flexWrap:'wrap',marginBottom:24}}>
+                  {candidates.map(c => (
+                    <div key={c.id} style={{textAlign:'center',padding:'12px 16px',borderRadius:12,border:'1px solid var(--card-border)',minWidth:80}}>
+                      <div style={{fontSize:20}}>{c.symbol}</div>
+                      <div style={{fontFamily:'Space Mono',fontSize:20,fontWeight:700,color:c.color}}>{tally[c.id]}</div>
+                      <div style={{fontSize:11,color:'var(--muted)'}}>{c.id}</div>
+                    </div>
+                  ))}
+                </div>
+                <button className="btn-green" onClick={onComplete}>🎓 Claim Your Certificate →</button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Confetti() {
+  const colors=['#ff6b1a','#ffe135','#00c896','#4a9eff','#b06aff','#ff3b5c'];
+  const pieces=Array.from({length:60},(_,i)=>({id:i,color:colors[i%colors.length],left:`${Math.random()*100}%`,delay:`${Math.random()*2}s`,duration:`${3+Math.random()*3}s`,size:`${6+Math.random()*8}px`,rotation:`${Math.random()*360}deg`}));
+  return <>{pieces.map(p=><div key={p.id} className="confetti-piece" style={{left:p.left,top:'-20px',background:p.color,width:p.size,height:p.size,animationDuration:p.duration,animationDelay:p.delay,transform:`rotate(${p.rotation})`}}/>)}</>;
+}
+
+function CertificateGenerator() {
+  const [name,setName]=useState('');
+  const [submitted,setSubmitted]=useState(false);
+  const [showConfetti,setShowConfetti]=useState(false);
+  const today=new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  const handleSubmit=()=>{if(!name.trim())return;setSubmitted(true);setShowConfetti(true);setTimeout(()=>setShowConfetti(false),5000);};
+  return (
+    <div className="fade-in">
+      {showConfetti&&<Confetti/>}
+      <div style={{textAlign:'center',marginBottom:40}}>
+        <span className="badge badge-saffron" style={{marginBottom:16,display:'inline-flex'}}>🎓 CIVIC CERTIFICATION</span>
+        <h2 className="hero-headline" style={{fontSize:'clamp(28px,4vw,48px)',marginBottom:12}}>You Did It! <span className="gradient-text">Earn Your Cert</span></h2>
+      </div>
+      {!submitted?(
+        <div className="card" style={{maxWidth:480,margin:'0 auto',textAlign:'center'}}>
+          <div style={{fontSize:56,marginBottom:20}}>🏅</div>
+          <h3 style={{fontFamily:'Syne',fontSize:22,fontWeight:800,marginBottom:8}}>What should we call you?</h3>
+          <p style={{color:'var(--muted)',fontSize:14,marginBottom:28}}>Enter your name to generate your personalized certificate</p>
+          <input type="text" value={name} onChange={e=>setName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&handleSubmit()} placeholder="Your Full Name"
+            style={{width:'100%',background:'#0d0d1a',border:'2px solid var(--card-border)',borderRadius:12,padding:'14px 18px',color:'var(--paper)',fontSize:16,fontFamily:'Plus Jakarta Sans',outline:'none',marginBottom:16}}
+            onFocus={e=>e.target.style.borderColor='var(--saffron)'} onBlur={e=>e.target.style.borderColor='var(--card-border)'}/>
+          <button className="btn-primary" onClick={handleSubmit} disabled={!name.trim()} style={{width:'100%',padding:'16px'}}>✨ Generate My Certificate</button>
+        </div>
+      ):(
+        <div className="fade-in">
+          <div className="cert-container" style={{marginBottom:32}}>
+            <div style={{position:'absolute',inset:0,background:'radial-gradient(circle at 30% 20%,rgba(255,107,26,0.08) 0%,transparent 50%)',pointerEvents:'none'}}/>
+            <div style={{display:'flex',height:6,borderRadius:3,overflow:'hidden',marginBottom:32}}><div style={{flex:1,background:'#ff9933'}}/><div style={{flex:1,background:'white'}}/><div style={{flex:1,background:'#138808'}}/></div>
+            <div className="cert-seal">🗳️</div>
+            <div style={{fontFamily:'Space Mono',fontSize:10,letterSpacing:3,color:'var(--muted)',marginBottom:12}}>CERTIFICATE OF COMPLETION</div>
+            <div style={{fontFamily:'Syne',fontSize:14,fontWeight:600,color:'var(--muted)',marginBottom:8}}>This certifies that</div>
+            <div style={{fontFamily:'Syne',fontSize:'clamp(28px,5vw,42px)',fontWeight:800,marginBottom:16,background:'linear-gradient(90deg,var(--saffron),var(--yellow))',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text'}}>{name}</div>
+            <div style={{fontFamily:'Plus Jakarta Sans',fontSize:15,color:'var(--muted)',marginBottom:24,lineHeight:1.7,maxWidth:420,margin:'0 auto 24px'}}>has successfully completed the <strong style={{color:'var(--paper)',display:'block',marginTop:4,fontSize:17}}>MatAdhikar: Election Process Educator</strong></div>
+            <div style={{display:'flex',justifyContent:'center',gap:8,flexWrap:'wrap',marginBottom:28}}>
+              {PHASES_META.map(p=><span key={p.id} style={{background:`${p.color}22`,border:`1px solid ${p.color}44`,color:p.color,borderRadius:999,padding:'4px 12px',fontSize:11,fontFamily:'Space Mono'}}>{p.emoji} {p.title}</span>)}
+            </div>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-end',paddingTop:24,borderTop:'1px solid var(--card-border)'}}>
+              <div style={{textAlign:'left'}}><div style={{fontFamily:'Syne',fontSize:13,fontWeight:700,color:'var(--saffron)',marginBottom:4}}>MatAdhikar</div><div style={{fontFamily:'Space Mono',fontSize:10,color:'var(--muted)'}}>Powered by Gemini AI</div></div>
+              <div style={{textAlign:'right'}}><div style={{fontFamily:'Space Mono',fontSize:10,color:'var(--muted)',marginBottom:4}}>DATE OF ISSUE</div><div style={{fontFamily:'Syne',fontSize:13,fontWeight:700}}>{today}</div></div>
+            </div>
+            <div style={{display:'flex',height:4,borderRadius:2,overflow:'hidden',marginTop:20}}><div style={{flex:1,background:'#ff9933'}}/><div style={{flex:1,background:'white'}}/><div style={{flex:1,background:'#138808'}}/></div>
+          </div>
+          <div style={{textAlign:'center'}}>
+            <p style={{color:'var(--muted)',fontSize:13,marginBottom:16}}>🎉 You're officially a civic champion! Share your achievement.</p>
+            <div style={{display:'flex',justifyContent:'center',gap:12}}>
+              <button className="btn-primary" onClick={()=>window.print()}>🖨️ Print Certificate</button>
+              <button className="btn-ghost" onClick={()=>{setSubmitted(false);setName('');}}>← Edit Name</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════
+// MAIN APP
+// ══════════════════════════════════════════
+function App() {
+  const [stage, setStage] = useState('landing');
+  const [currentPhase, setCurrentPhase] = useState(1);
+  const [completedPhases, setCompletedPhases] = useState([]);
+  
+  
+
+  const handlePhaseComplete = (phaseId) => {
+    if (!completedPhases.includes(phaseId)) setCompletedPhases(prev => [...prev, phaseId]);
+    if (phaseId === 5) setStage('evm');
+    else setCurrentPhase(phaseId + 1);
+  };
+
+  return (
+    <div style={{ position: 'relative', zIndex: 1 }}>
+      {/* ── VICE CITY MODAL ── */}
+      {/* VC overlay is plain HTML */}
+
+      {/* ── CIVIC SCORE MODAL ── */}
+      {/* CC overlay is plain HTML */}
+
+      {/* ── LANDING ── */}
+      {stage === 'landing' && (
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <TickerBanner />
+          <div className="container" style={{ paddingTop: '60px', paddingBottom: '40px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '80px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width:36,height:36,borderRadius:'50%',background:'linear-gradient(135deg,#ff6b1a,#ffe135)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18 }}>🗳️</div>
+                <span style={{ fontFamily:'Syne',fontWeight:800,fontSize:18,letterSpacing:'-0.5px' }}>MatAdhikar</span>
+              </div>
+              <span className="badge badge-saffron">BETA v1.0</span>
+            </div>
+
+            <div style={{ maxWidth: 700, marginBottom: '60px' }}>
+              <div style={{ marginBottom: 20 }}>
+                <span className="badge badge-green" style={{ marginBottom: 20, display: 'inline-flex' }}>✨ AI-POWERED CIVIC LEARNING</span>
+              </div>
+              <h1 className="hero-headline" style={{ marginBottom: 24 }}>
+                Democracy is a<br />
+                <span className="gradient-text">Vibe. Learn It.</span>
+              </h1>
+              <p style={{ fontSize: 18, color: '#aaa', lineHeight: 1.7, marginBottom: 40, maxWidth: 520 }}>
+                5 phases. Real ECI guidelines. Zero boring textbooks.
+                Master the Indian election process and earn your civic cert — powered by Gemini AI.
+              </p>
+
+              {/* ── HERO BUTTONS ROW 1 ── */}
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
+                <button className="btn-primary" style={{ fontSize: 16, padding: '16px 40px' }} onClick={() => setStage('learning')}>
+                  Start Learning →
+                </button>
+                <button className="btn-ghost">Watch Demo ▶</button>
+              </div>
+
+              {/* ── HERO BUTTONS ROW 2 — NEW ── */}
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+                {/* Divider line */}
+                <div style={{ width: '100%', height: 1, background: 'var(--card-border)', marginBottom: 2 }} />
+
+                <button className="btn-vice-city" onClick={() => { document.getElementById('vc-overlay').style.display='block'; window.scrollTo(0,0); }}>
+                  <span style={{ fontSize: 16 }}>🎮</span>
+                  <span>VOTE CITY — Story Mode</span>
+                  <span style={{ fontSize: 10, background: '#ff6ec722', borderRadius: 4, padding: '2px 6px', color: '#ff6ec7', border: '1px solid #ff6ec755' }}>GTA STYLE</span>
+                </button>
+
+                <button className="btn-civic-score" onClick={() => { document.getElementById('cc-overlay').style.display='block'; window.scrollTo(0,0); }}>
+                  <span style={{ fontSize: 16 }}>📊</span>
+                  <span>My Civic Score</span>
+                  <span style={{ fontSize: 10, background: '#00ffcc22', borderRadius: 4, padding: '2px 6px', color: '#00ffcc', border: '1px solid #00ffcc55' }}>AI POWERED</span>
+                </button>
+              </div>
+
+              {/* Sub-labels */}
+              <div style={{ display: 'flex', gap: 12, marginTop: 8, flexWrap: 'wrap' }}>
+                <div style={{ fontSize: 11, color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 4, paddingLeft: 4 }}>
+                  <span style={{ color: '#ff6ec7' }}>●</span> 4-chapter GTA-style election simulation with Gemini AI narration
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ color: '#00ffcc' }}>●</span> 6-question civic awareness quiz with personalized AI debrief
+                </div>
+              </div>
+            </div>
+
+            {/* Phase Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(160px,1fr))', gap: 12, marginBottom: '60px' }}>
+              {PHASES_META.map((p, i) => (
+                <div key={p.id} className="card" style={{ animationDelay:`${i*.1}s`, borderColor:'var(--card-border)', padding:'20px 16px', cursor:'default' }}>
+                  <div style={{ fontSize:28, marginBottom:10 }}>{p.emoji}</div>
+                  <div style={{ fontFamily:'Syne', fontWeight:700, fontSize:13, color:p.color, marginBottom:4 }}>Phase {p.id}</div>
+                  <div style={{ fontSize:13, fontWeight:600, lineHeight:1.4 }}>{p.title}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Stats */}
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16, marginBottom:40 }}>
+              {[{num:"5",label:"Learning Phases"},{num:"AI",label:"Powered by Gemini"},{num:"1",label:"Epic Certificate"}].map((s,i)=>(
+                <div key={i} style={{ textAlign:'center', padding:'24px 16px', borderRadius:16, border:'1px solid var(--card-border)', background:'var(--card-bg)' }}>
+                  <div style={{ fontFamily:'Syne', fontSize:36, fontWeight:800, color:'var(--saffron)', marginBottom:8 }}>{s.num}</div>
+                  <div style={{ fontSize:13, color:'var(--muted)' }}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {stage === 'learning' && (
+        <>
+          <TickerBanner />
+          <div className="container" style={{ paddingTop:40, paddingBottom:60 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:32 }}>
+              <button onClick={() => setStage('landing')} style={{ background:'none', border:'none', color:'var(--muted)', cursor:'pointer', fontSize:14, fontFamily:'Plus Jakarta Sans', display:'flex', alignItems:'center', gap:6 }}>← MatAdhikar</button>
+              <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                <button className="btn-vice-city" style={{padding:'8px 16px',fontSize:10}} onClick={() => { document.getElementById('vc-overlay').style.display='block'; window.scrollTo(0,0); }}>🎮 Story Mode</button>
+                <button className="btn-civic-score" style={{padding:'8px 16px',fontSize:10}} onClick={() => { document.getElementById('cc-overlay').style.display='block'; window.scrollTo(0,0); }}>📊 My Score</button>
+                <span className="badge badge-saffron">{completedPhases.length}/5 COMPLETE</span>
+              </div>
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'220px 1fr', gap:32, alignItems:'start' }}>
+              <div><PhaseSidebar currentPhase={currentPhase} completedPhases={completedPhases} /></div>
+              <div><LearningModule phase={currentPhase} onPhaseComplete={handlePhaseComplete} completedPhases={completedPhases} /></div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {stage === 'evm' && (
+        <>
+          <TickerBanner />
+          <div className="container" style={{ paddingTop:40, paddingBottom:80 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:32 }}>
+              <button onClick={() => setStage('learning')} style={{ background:'none', border:'none', color:'var(--muted)', cursor:'pointer', fontSize:14, fontFamily:'Plus Jakarta Sans' }}>← Back</button>
+              <span className="badge badge-green">ALL 5 PHASES COMPLETE ✅</span>
+            </div>
+            <EVMSimulator onComplete={() => setStage('certificate')} />
+          </div>
+        </>
+      )}
+
+      {stage === 'certificate' && (
+        <>
+          <TickerBanner />
+          <div className="container" style={{ paddingTop:40, paddingBottom:80 }}>
+            <div style={{ display:'flex', justifyContent:'flex-start', marginBottom:32 }}>
+              <button onClick={() => setStage('evm')} style={{ background:'none', border:'none', color:'var(--muted)', cursor:'pointer', fontSize:14, fontFamily:'Plus Jakarta Sans' }}>← Back to EVM</button>
+            </div>
+            <CertificateGenerator />
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+
+<!-- VOTE CITY OVERLAY -->
+<div id="vc-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);overflow-y:auto;">
+  <div style="position:relative;max-width:760px;margin:20px auto;border-radius:16px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,0.9);">
+    <button onclick="document.getElementById('vc-overlay').style.display='none'" 
+      style="position:sticky;top:0;float:right;z-index:100;margin:10px 10px 0 0;background:rgba(255,110,199,0.15);border:1.5px solid #ff6ec7;color:#ff6ec7;border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:sans-serif;line-height:1;">✕</button>
+    
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+#app{background:#0a0a0f;min-height:700px;font-family:'Share Tech Mono',monospace;color:#fff;position:relative;}
+.vc-font{font-family:'Orbitron',monospace;}
+/* HUD */
+#hud{background:#000;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ff6ec7;}
+.hud-name{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;color:#ff6ec7;letter-spacing:2px;}
+.hud-phase{font-size:10px;color:#00ffcc;letter-spacing:2px;font-family:'Orbitron',monospace;}
+.bar-wrap{display:flex;align-items:center;gap:6px;margin-top:3px;}
+.bar{width:70px;height:4px;background:#222;border-radius:2px;}
+.bar-fill{height:4px;border-radius:2px;transition:width 0.5s;}
+/* Game canvas area */
+#sceneArea{width:100%;height:220px;position:relative;overflow:hidden;background:#0a0f0a;}
+#gameCanvas{display:block;width:100%;height:220px;}
+/* Dialogue */
+#dialogue{background:#000;border-top:2px solid #ff6ec7;padding:12px 14px;}
+.npc-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;}
+.npc-av{width:40px;height:40px;border-radius:4px;border:1px solid #ff6ec7;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;font-family:'Orbitron',monospace;}
+.npc-info{flex:1;}
+.npc-nm{font-family:'Orbitron',monospace;font-size:10px;color:#ff6ec7;letter-spacing:2px;}
+.npc-role{font-size:9px;color:#555;letter-spacing:1px;margin-bottom:4px;}
+.npc-txt{font-size:12px;color:#ddd;line-height:1.7;}
+/* Choices */
+#choices{background:#06060f;padding:10px 14px;border-top:1px solid #1a1a2a;}
+.choice{display:flex;align-items:center;gap:8px;padding:9px 10px;margin-bottom:6px;border:1px solid #222;border-radius:3px;cursor:pointer;background:#0a0a18;transition:all 0.15s;}
+.choice:hover{border-color:#ff6ec7;background:#1a0020;}
+.ck{width:22px;height:22px;border-radius:3px;background:#ff6ec7;color:#000;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Orbitron',monospace;}
+.ct{font-size:12px;color:#ccc;}
+/* Feedback */
+#feedback{padding:10px 14px;font-size:12px;line-height:1.7;display:none;border-top:2px solid #00ff88;}
+#feedback.bad{border-color:#ff3333;background:#0f0000;color:#ff6666;}
+#feedback.good{background:#000f05;color:#00ff88;}
+/* Mini-game overlay */
+#miniGame{display:none;background:#000;padding:16px 14px;border-top:2px solid #ffcc00;}
+.mg-title{font-family:'Orbitron',monospace;font-size:11px;color:#ffcc00;letter-spacing:3px;margin-bottom:10px;}
+/* EVM */
+#evmBox{background:#1a2a1a;border:2px solid #00ff88;border-radius:6px;padding:16px;max-width:320px;margin:0 auto;}
+.evm-title{font-family:'Orbitron',monospace;font-size:10px;color:#00ff88;text-align:center;letter-spacing:3px;margin-bottom:12px;}
+.evm-candidate{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin:6px 0;border:1px solid #333;border-radius:3px;background:#0a150a;cursor:pointer;transition:all 0.15s;}
+.evm-candidate:hover{border-color:#00ff88;background:#0f200f;}
+.evm-sym{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;background:#1a3a1a;border:1px solid #00ff88;}
+.evm-name{font-size:11px;color:#aaa;flex:1;padding:0 10px;font-family:'Orbitron',monospace;letter-spacing:1px;}
+.evm-btn{width:28px;height:22px;background:#1565C0;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;font-family:'Orbitron',monospace;border:2px solid #1976D2;cursor:pointer;}
+.evm-btn:hover{background:#0D47A1;}
+/* VVPAT */
+#vvpatBox{background:#0a0a0a;border:2px solid #ffcc00;border-radius:6px;padding:12px;max-width:260px;margin:10px auto 0;text-align:center;display:none;}
+.vvpat-title{font-family:'Orbitron',monospace;font-size:9px;color:#ffcc00;letter-spacing:2px;margin-bottom:6px;}
+.vvpat-slip{background:#fffde7;color:#000;padding:10px;border-radius:3px;font-size:11px;font-family:'Share Tech Mono',monospace;border:1px dashed #ffcc00;}
+.vvpat-timer{font-family:'Orbitron',monospace;font-size:18px;font-weight:700;color:#ffcc00;margin:8px 0;}
+/* Ink mini */
+#inkBox{text-align:center;padding:10px 0;}
+.ink-finger{width:60px;height:120px;margin:0 auto 10px;position:relative;cursor:pointer;}
+.ink-progress{height:6px;background:#222;border-radius:3px;margin:6px 0;}
+.ink-fill{height:6px;border-radius:3px;background:#1a237e;width:0%;transition:width 0.3s;}
+/* next btn */
+#nextBtn{display:none;width:100%;padding:10px;background:#ff6ec7;color:#000;font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:3px;border:none;cursor:pointer;}
+#nextBtn:hover{background:#ff3aa0;}
+/* Phase flash */
+#phaseFlash{text-align:center;padding:12px;background:#000;border-bottom:1px solid #1a1a2a;}
+.pf-title{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:#ff6ec7;letter-spacing:3px;}
+.pf-sub{font-size:10px;color:#555;letter-spacing:2px;margin-top:3px;}
+/* title screen */
+#titleScreen{background:#000;min-height:700px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;}
+/* end screen */
+#endScreen{background:#000;min-height:600px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;display:none;}
+.badge{width:100px;height:100px;border-radius:50%;border:3px solid #ffcc00;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 1rem;background:#0a0a00;}
+.badge-icon{font-size:30px;}
+.badge-txt{font-family:'Orbitron',monospace;font-size:8px;color:#ffcc00;letter-spacing:1px;margin-top:4px;}
+.ai-strip{font-size:12px;color:#aaa;font-family:'Share Tech Mono',monospace;border-left:2px solid #ff6ec7;padding-left:12px;text-align:left;max-width:460px;line-height:1.8;margin:1rem 0;}
+</style>
+
+<div id="app">
+
+<div id="titleScreen">
+  <div style="font-family:'Orbitron',monospace;font-size:9px;color:#444;letter-spacing:4px;margin-bottom:1rem;">ELECTION COMMISSION OF INDIA · SIMULATION</div>
+  <div style="font-family:'Orbitron',monospace;font-size:32px;font-weight:900;color:#ff6ec7;letter-spacing:4px;line-height:1.1;">VOTE<br><span style="color:#ffcc00;">INDIA</span></div>
+  <div style="font-family:'Orbitron',monospace;font-size:10px;color:#00ffcc;letter-spacing:6px;margin:8px 0 1.5rem;">POLLING DAY SIMULATOR</div>
+  <svg width="300" height="90" viewBox="0 0 300 90" style="margin-bottom:1.5rem;">
+    <rect x="10" y="20" width="280" height="60" rx="4" fill="#0a150a" stroke="#00ff88" stroke-width="1"/>
+    <rect x="20" y="30" width="260" height="40" rx="3" fill="#0d1a0d" stroke="#1a3a1a" stroke-width="0.5"/>
+    <text x="150" y="48" text-anchor="middle" font-family="'Orbitron',monospace" font-size="8" fill="#00ff88" letter-spacing="3">ELECTRONIC VOTING MACHINE</text>
+    <rect x="40" y="55" width="18" height="12" rx="2" fill="#1565C0" stroke="#1976D2" stroke-width="1"/>
+    <rect x="80" y="55" width="18" height="12" rx="2" fill="#1565C0" stroke="#1976D2" stroke-width="1"/>
+    <rect x="120" y="55" width="18" height="12" rx="2" fill="#1565C0" stroke="#1976D2" stroke-width="1"/>
+    <rect x="160" y="55" width="18" height="12" rx="2" fill="#1565C0" stroke="#1976D2" stroke-width="1"/>
+    <rect x="200" y="55" width="18" height="12" rx="2" fill="#1565C0" stroke="#1976D2" stroke-width="1"/>
+    <rect x="240" y="55" width="18" height="12" rx="2" fill="#1565C0" stroke="#1976D2" stroke-width="1"/>
+    <text x="10" y="15" font-family="'Share Tech Mono',monospace" font-size="8" fill="#333">EVM · BHARAT ELECTRONICS LTD</text>
+  </svg>
+  <div style="font-size:12px;color:#666;max-width:400px;line-height:1.8;font-family:'Share Tech Mono',monospace;margin-bottom:1.5rem;">
+    You are PRIYA SHARMA — a first-time voter in the 2024 General Elections. Navigate through the real polling process: find your booth, verify your identity, sign the register, apply indelible ink, cast your vote on the EVM, and verify on VVPAT.
+  </div>
+  <button onclick="VC.startGame()" style="background:none;border:2px solid #ff6ec7;color:#ff6ec7;font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:4px;padding:12px 28px;cursor:pointer;">[ ENTER POLLING STATION ]</button>
+  <div style="font-size:9px;color:#333;margin-top:1.5rem;letter-spacing:2px;font-family:'Orbitron',monospace;">VOTER ID: PYS-2024-001 · CONSTITUENCY: 47-RAJAJI NAGAR</div>
+</div>
+
+<div id="mainGame" style="display:none;">
+  <div id="hud">
+    <div>
+      <div class="hud-name" id="hudName">PRIYA SHARMA</div>
+      <div class="bar-wrap"><div class="bar"><div class="bar-fill" id="civicBar" style="width:0%;background:#ff6ec7;"></div></div><span style="font-size:9px;color:#ff6ec7;" id="civicVal">0</span></div>
+    </div>
+    <div style="text-align:center;">
+      <div class="hud-phase" id="hudPhase">PHASE 1 / 5</div>
+      <div style="font-size:9px;color:#444;letter-spacing:1px;margin-top:2px;" id="hudLoc">OUTSIDE POLLING STATION</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-family:'Orbitron',monospace;font-size:9px;color:#555;letter-spacing:1px;">VOTER ID</div>
+      <div style="font-family:'Orbitron',monospace;font-size:10px;color:#ffcc00;letter-spacing:1px;">PYS-2024-001</div>
+      <div style="font-size:9px;color:#333;margin-top:2px;" id="timerDisp">00:00</div>
+    </div>
+  </div>
+
+  <canvas id="gameCanvas" width="680" height="220" style="width:100%;height:220px;display:block;background:#0a0f0a;"></canvas>
+
+  <div id="phaseFlash">
+    <div class="pf-title" id="pfTitle">PHASE 1: ARRIVAL & ORIENTATION</div>
+    <div class="pf-sub" id="pfSub">GOVT. HIGHER SECONDARY SCHOOL NO. 47 · BOOTH 12</div>
+  </div>
+
+  <div id="dialogue">
+    <div class="npc-row">
+      <div class="npc-av" id="npcAv" style="background:#0a1a00;color:#ff6ec7;">BLO</div>
+      <div class="npc-info">
+        <div class="npc-nm" id="npcName">BOOTH LEVEL OFFICER</div>
+        <div class="npc-role" id="npcRole">OUTSIDE POLLING STATION · ELECTION DUTY</div>
+        <div class="npc-txt" id="npcTxt">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="miniGame"></div>
+  <div id="feedback"></div>
+  <div id="choices"></div>
+  <div id="aiStrip" style="display:none;padding:8px 14px;font-size:11px;color:#ff6ec7;font-family:'Share Tech Mono',monospace;border-top:1px solid #1a1a2a;">Generating story beat...</div>
+  <button id="nextBtn" onclick="VC.nextPhase()">[ CONTINUE ]</button>
+</div>
+
+<div id="endScreen">
+  <div style="font-family:'Orbitron',monospace;font-size:9px;color:#444;letter-spacing:4px;margin-bottom:1rem;">VOTING COMPLETE</div>
+  <div class="badge"><div class="badge-icon">🗳️</div><div class="badge-txt">CIVIC DUTY</div></div>
+  <div style="font-family:'Orbitron',monospace;font-size:22px;font-weight:900;color:#ffcc00;letter-spacing:3px;margin-bottom:6px;" id="endRank">FIRST-TIME VOTER</div>
+  <div style="font-family:'Orbitron',monospace;font-size:11px;color:#00ffcc;letter-spacing:2px;margin-bottom:1rem;" id="endScore">CIVIC SCORE: 0 · TIME: 00:00</div>
+  <div style="font-size:12px;color:#777;max-width:400px;line-height:1.8;font-family:'Share Tech Mono',monospace;margin-bottom:1rem;" id="endMsg"></div>
+  <div class="ai-strip" id="endAi" style="display:none;"></div>
+  <div style="font-size:10px;color:#ff6ec7;font-family:'Share Tech Mono',monospace;margin-bottom:1rem;" id="endLoad">LOADING DEBRIEF...</div>
+  <button onclick="VC.restartGame()" style="background:none;border:2px solid #ff6ec7;color:#ff6ec7;font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:4px;padding:10px 24px;cursor:pointer;margin-bottom:1rem;">[ VOTE AGAIN ]</button>
+  <div class="choice" onclick="void(0)" style="display:inline-flex;cursor:pointer;max-width:360px;margin:0 auto;">
+    <div class="ck" style="background:#00ffcc;color:#000;">?</div>
+    <div class="ct">Learn about India's EVM &amp; VVPAT system ↗</div>
+  </div>
+</div>
+
+</div>
+
+<script>
+(function() {
+'use strict';
+
+const GEMINI_KEY = "AIzaSyBzd83MbWtpsUfM520qxloauhhQx1F5C_M";
+const GS = {civic:0, phase:0, startTime:0, elapsed:0, evmChoice:'', inkDone:false, vvpatDone:false, choices:[]};
+
+const PHASES = [
+  {
+    id:1, title:"PHASE 1: ARRIVAL & ORIENTATION", sub:"GOVT. HIGHER SECONDARY SCHOOL NO. 47 · BOOTH 12",
+    loc:"OUTSIDE POLLING STATION", hudPhase:"PHASE 1 / 5",
+    npc:{av:"BLO",nm:"BOOTH LEVEL OFFICER (BLO)",role:"OUTSIDE POLLING STATION · ELECTION DUTY",bg:"#0a1a00",color:"#ff6ec7"},
+    txt:"Namaste! Welcome to Polling Booth 12. First, I need to find your name on the voter list. Can I have your Voter ID slip? Your polling serial number is printed on it — that tells us exactly which room and officer to go to. Queue for Room B is on the left.",
+    miniGame: null,
+    choices:[
+      {t:"Show the voter slip and ask the BLO to confirm my serial number and room.",k:"A",delta:25,good:true,fb:"CORRECT. The voter slip (issued before election day) has your serial number on the electoral roll. The BLO cross-checks it and directs you to Room B, Officer 1. Always carry your slip — it speeds up the process."},
+      {t:"Skip the BLO and walk straight into the building.",k:"B",delta:-10,good:false,fb:"WRONG MOVE. Without checking your serial number with the BLO, you could queue at the wrong room, wasting your time and causing confusion. The BLO is your first mandatory checkpoint."},
+      {t:"Ask the BLO what the voter list is and why it matters.",k:"C",delta:20,good:true,fb:"GREAT QUESTION. The electoral roll is a complete list of registered voters in the constituency. It contains your name, photo, address, and serial number. Only names on this roll can vote at this booth."}
+    ],
+    scene:"outside"
+  },
+  {
+    id:2, title:"PHASE 2: IDENTITY VERIFICATION", sub:"POLLING ROOM B · FIRST POLLING OFFICER",
+    loc:"POLLING ROOM B — FIRST OFFICER", hudPhase:"PHASE 2 / 5",
+    npc:{av:"PO1",nm:"FIRST POLLING OFFICER",role:"IDENTITY VERIFICATION · ELECTORAL ROLL CHECK",bg:"#001a1a",color:"#00ffcc"},
+    txt:"Please present a valid photo ID. I will verify your name, photo, and address against the electoral roll. Acceptable IDs include your EPIC Voter ID card, Aadhaar card, passport, driving licence, MNREGA job card, or bank passbook with photo. Which do you have?",
+    miniGame:"id_select",
+    choices:null,
+    scene:"room_verify"
+  },
+  {
+    id:3, title:"PHASE 3: INK & REGISTER — FORM 17A", sub:"SECOND POLLING OFFICER · INDELIBLE INK",
+    loc:"POLLING ROOM B — SECOND OFFICER", hudPhase:"PHASE 3 / 5",
+    npc:{av:"PO2",nm:"SECOND POLLING OFFICER",role:"FORM 17A REGISTER · INDELIBLE INK APPLICATION",bg:"#1a1a00",color:"#ffcc00"},
+    txt:"Please sign or put your thumb impression on Form 17A — this officially records that you have come to vote. Then extend your LEFT index finger. I will apply indelible ink. This ink cannot be washed off for several days — it prevents anyone from voting twice. Once done, I will give you your voting slip.",
+    miniGame:"ink",
+    choices:null,
+    scene:"room_ink"
+  },
+  {
+    id:4, title:"PHASE 4: EVM & VVPAT", sub:"THIRD POLLING OFFICER · VOTING COMPARTMENT",
+    loc:"VOTING COMPARTMENT — PRIVATE BOOTH", hudPhase:"PHASE 4 / 5",
+    npc:{av:"PO3",nm:"THIRD POLLING OFFICER",role:"VOTING SLIP COLLECTION · EVM ACTIVATION",bg:"#0a000f",color:"#aa88ff"},
+    txt:"Hand me your voting slip. I will enter your serial number and enable the EVM ballot unit. Enter the compartment — it is completely private. Press the BLUE button next to your chosen candidate. The EVM will beep once. Then verify your vote on the VVPAT window — it shows the candidate name and symbol for 7 seconds before the slip drops. Your vote is cast.",
+    miniGame:"evm",
+    choices:null,
+    scene:"voting_booth"
+  },
+  {
+    id:5, title:"PHASE 5: EXIT & CIVIC PRIDE", sub:"OUTSIDE POLLING STATION · MISSION COMPLETE",
+    loc:"OUTSIDE POLLING STATION — DONE!", hudPhase:"PHASE 5 / 5",
+    npc:{av:"EC",nm:"ELECTION COMMISSION OFFICIAL",role:"EXIT POINT · VOTER AWARENESS",bg:"#000f1a",color:"#ff6ec7"},
+    txt:"Congratulations! You have successfully cast your vote. Your inked finger is your badge of honour — it shows you participated in the world's largest democracy. Remember: the indelible ink (Mysore Paints formulation) stays for 72+ hours. Share your experience — civic participation is contagious!",
+    miniGame:null,
+    choices:[
+      {t:"Take a proud selfie showing the inked finger and share with friends.",k:"A",delta:20,good:true,fb:"DEMOCRACY AMPLIFIED! Showing your inked finger encourages others to vote. Voter turnout increases when people see their peers participating. This is organic civic mobilisation."},
+      {t:"Ask the official about the NOTA option on the EVM.",k:"B",delta:25,good:true,fb:"EXCELLENT. NOTA (None Of The Above) is a legitimate option on every Indian EVM, introduced in 2013 per the Supreme Court ruling. If no candidate deserves your vote, NOTA lets you formally register that opinion."},
+      {t:"Leave quietly without talking to anyone.",k:"C",delta:5,good:true,fb:"You voted — that alone is significant. But sharing the experience helps build a culture of participation. Every conversation about voting matters."}
+    ],
+    scene:"outside_done"
+  }
+];
+
+let timerInterval = null;
+
+function startGame() {
+  document.getElementById('titleScreen').style.display='none';
+  document.getElementById('mainGame').style.display='block';
+  GS.startTime = Date.now();
+  timerInterval = setInterval(updateTimer, 1000);
+  loadPhase(0);
+}
+
+function updateTimer() {
+  GS.elapsed = Math.floor((Date.now()-GS.startTime)/1000);
+  const m = Math.floor(GS.elapsed/60).toString().padStart(2,'0');
+  const s = (GS.elapsed%60).toString().padStart(2,'0');
+  const el = document.getElementById('timerDisp');
+  if(el) el.textContent = m+':'+s;
+}
+
+function drawScene(sceneName) {
+  const c = document.getElementById('gameCanvas');
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  const W = 680, H = 220;
+  ctx.clearRect(0,0,W,H);
+
+  if(sceneName==='outside'||sceneName==='outside_done') {
+    ctx.fillStyle='#0a100a'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#111d11'; ctx.fillRect(0,80,W,140);
+    const bldgs = [{x:0,w:180,h:130,c:'#0d1a0d'},{x:190,w:280,h:160,c:'#0a150a'},{x:480,w:200,h:120,c:'#0d1a0d'}];
+    bldgs.forEach(b=>{
+      ctx.fillStyle=b.c; ctx.fillRect(b.x,H-b.h,b.w,b.h);
+      ctx.strokeStyle='#1a3a1a'; ctx.lineWidth=0.5; ctx.strokeRect(b.x,H-b.h,b.w,b.h);
+    });
+    ctx.fillStyle='#1a3a1a'; ctx.fillRect(190,H-165,280,8);
+    ctx.font='bold 9px Orbitron,monospace'; ctx.fillStyle='#00ff88'; ctx.textAlign='center';
+    ctx.fillText('GOVT. HIGHER SECONDARY SCHOOL NO. 47',330,H-152);
+    ctx.font='8px Share Tech Mono,monospace'; ctx.fillStyle='#ffcc00';
+    ctx.fillText('POLLING STATION · BOOTH 12',330,H-140);
+    for(let i=0;i<8;i++){
+      ctx.fillStyle=i%2===0?'#1a3a1a':'#0d200d';
+      ctx.fillRect(190+i*35,H-130,33,90);
+    }
+    ctx.fillStyle='#0a1a0a'; ctx.fillRect(290,H-50,80,50);
+    ctx.strokeStyle='#00ff88'; ctx.lineWidth=1; ctx.strokeRect(290,H-50,80,50);
+    ctx.fillStyle='#0d0'; ctx.fillRect(300,H-40,60,3);
+    for(let i=0;i<6;i++){
+      const lx=200+i*70, ly=H-120+Math.floor(i/2)*40;
+      ctx.fillStyle='rgba(255,204,0,0.15)';ctx.fillRect(lx+5,ly,25,18);
+      ctx.strokeStyle='#444';ctx.lineWidth=0.5;ctx.strokeRect(lx+5,ly,25,18);
+    }
+    ctx.fillStyle='#0a0'; ctx.fillRect(0,H-20,W,20);
+    ctx.strokeStyle='#ff6ec7'; ctx.lineWidth=1; ctx.strokeRect(10,H-118,40,28);
+    ctx.font='bold 8px Orbitron,monospace'; ctx.fillStyle='#ff6ec7'; ctx.textAlign='left';
+    ctx.fillText('BLO DESK',12,H-106);
+    const flagColors=['#ff9933','#fff','#138808'];
+    flagColors.forEach((fc,fi)=>{ctx.fillStyle=fc;ctx.fillRect(W-50,H-180+fi*14,40,14);});
+    ctx.strokeStyle='#000'; ctx.lineWidth=0.5; ctx.strokeRect(W-50,H-180,40,42);
+    ctx.fillStyle='#000080'; ctx.beginPath(); ctx.arc(W-30,H-159,5,0,Math.PI*2); ctx.fill();
+    if(sceneName==='outside_done'){
+      ctx.fillStyle='rgba(255,204,0,0.2)'; ctx.fillRect(0,0,W,H);
+      ctx.font='bold 14px Orbitron,monospace'; ctx.fillStyle='#ffcc00'; ctx.textAlign='center';
+      ctx.fillText('VOTE CAST. DEMOCRACY SERVED.',W/2,30);
+    }
+  } else if(sceneName==='room_verify') {
+    ctx.fillStyle='#080d08'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#0d150d'; ctx.fillRect(20,20,W-40,H-40);
+    ctx.strokeStyle='#00ff88'; ctx.lineWidth=0.5; ctx.strokeRect(20,20,W-40,H-40);
+    ctx.font='bold 9px Orbitron,monospace'; ctx.fillStyle='#00ffcc'; ctx.textAlign='center';
+    ctx.fillText('POLLING ROOM B — FIRST OFFICER',W/2,40);
+    ctx.fillStyle='#0a200a'; ctx.fillRect(50,60,200,120);
+    ctx.strokeStyle='#1a4a1a'; ctx.lineWidth=1; ctx.strokeRect(50,60,200,120);
+    ctx.font='8px Share Tech Mono,monospace'; ctx.fillStyle='#00ff88'; ctx.textAlign='left';
+    ctx.fillText('ELECTORAL ROLL',60,80);
+    for(let i=0;i<6;i++){ctx.fillStyle='#1a3a1a';ctx.fillRect(60,88+i*14,180,10);}
+    ctx.fillStyle='#ffcc00'; ctx.fillRect(60,88+2*14,180,10);
+    ctx.font='7px Share Tech Mono,monospace'; ctx.fillStyle='#000';
+    ctx.fillText('SHARMA, PRIYA — S/N: 0847',62,98+2*14-3);
+    ctx.fillStyle='#0a1a2a'; ctx.fillRect(300,50,320,140);
+    ctx.strokeStyle='#00ffcc'; ctx.lineWidth=1; ctx.strokeRect(300,50,320,140);
+    ctx.font='8px Orbitron,monospace'; ctx.fillStyle='#00ffcc'; ctx.textAlign='center';
+    ctx.fillText('IDENTITY VERIFICATION',460,70);
+    const ids=[{n:'EPIC VOTER ID',c:'#001a2a',tc:'#00ffcc'},{n:'AADHAAR CARD',c:'#1a1a00',tc:'#ffcc00'},{n:'PASSPORT',c:'#001a00',tc:'#00ff88'},{n:'DRIVING LICENCE',c:'#1a0000',tc:'#ff8888'}];
+    ids.forEach((id,i)=>{
+      const ix=310+(i%2)*155, iy=80+Math.floor(i/2)*50;
+      ctx.fillStyle=id.c; ctx.fillRect(ix,iy,140,38);
+      ctx.strokeStyle=id.tc; ctx.lineWidth=0.5; ctx.strokeRect(ix,iy,140,38);
+      ctx.font='7px Orbitron,monospace'; ctx.fillStyle=id.tc; ctx.textAlign='center';
+      ctx.fillText(id.n,ix+70,iy+22);
+    });
+  } else if(sceneName==='room_ink') {
+    ctx.fillStyle='#0d0d00'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#15150a'; ctx.fillRect(20,20,W-40,H-40);
+    ctx.strokeStyle='#ffcc00'; ctx.lineWidth=0.5; ctx.strokeRect(20,20,W-40,H-40);
+    ctx.font='bold 9px Orbitron,monospace'; ctx.fillStyle='#ffcc00'; ctx.textAlign='center';
+    ctx.fillText('FORM 17A — OFFICIAL REGISTER',W/2,40);
+    ctx.fillStyle='#1a1500'; ctx.fillRect(40,55,260,140);
+    ctx.strokeStyle='#3a3000'; ctx.lineWidth=1; ctx.strokeRect(40,55,260,140);
+    ctx.font='8px Share Tech Mono,monospace'; ctx.fillStyle='#888'; ctx.textAlign='left';
+    ctx.fillText('FORM 17A · REGISTER OF VOTERS',50,75);
+    for(let i=0;i<7;i++){ctx.fillStyle='#2a2500';ctx.fillRect(50,82+i*14,240,12);}
+    ctx.fillStyle='#3a3000'; ctx.fillRect(50,82+5*14,240,12);
+    ctx.font='6px Share Tech Mono,monospace'; ctx.fillStyle='#ffcc00';
+    ctx.fillText('0847  SHARMA PRIYA  ___________  ✓',52,82+5*14+8);
+    ctx.fillStyle='#0a0a1a'; ctx.fillRect(330,50,300,150);
+    ctx.strokeStyle='#1a237e'; ctx.lineWidth=2; ctx.strokeRect(330,50,300,150);
+    ctx.font='8px Orbitron,monospace'; ctx.fillStyle='#7986cb'; ctx.textAlign='center';
+    ctx.fillText('INDELIBLE INK · LEFT INDEX FINGER',480,70);
+    ctx.fillStyle='#d4c5a9'; ctx.beginPath(); ctx.ellipse(480,130,25,55,0,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#1a237e'; ctx.fillRect(458,78,44,20);
+    ctx.font='7px Share Tech Mono,monospace'; ctx.fillStyle='#aaa'; ctx.textAlign='center';
+    ctx.fillText('APPLY INK HERE',480,155);
+    ctx.font='7px Orbitron,monospace'; ctx.fillStyle='#555';
+    ctx.fillText('MYSORE PAINTS & VARNISH LTD.',480,172);
+  } else if(sceneName==='voting_booth') {
+    ctx.fillStyle='#05050f'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#0a0a18'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#080820'; ctx.fillRect(160,10,360,200);
+    ctx.strokeStyle='#1a237e'; ctx.lineWidth=1; ctx.strokeRect(160,10,360,200);
+    ctx.font='bold 8px Orbitron,monospace'; ctx.fillStyle='#7986cb'; ctx.textAlign='center';
+    ctx.fillText('VOTING COMPARTMENT · PRIVATE',340,28);
+    ctx.fillStyle='#0d1a0d'; ctx.fillRect(180,40,320,140);
+    ctx.strokeStyle='#00ff88'; ctx.lineWidth=1.5; ctx.strokeRect(180,40,320,140);
+    ctx.font='7px Orbitron,monospace'; ctx.fillStyle='#00ff88'; ctx.textAlign='center';
+    ctx.fillText('EVM · BALLOT UNIT',340,58);
+    const cands=[{sym:'☀',n:'ANAND KUMAR'},{sym:'⚡',n:'PREET SINGH'},{sym:'🌿',n:'SANYA PATEL'},{sym:'★',n:'NOTA'}];
+    cands.forEach((cd,i)=>{
+      const cy=68+i*28;
+      ctx.fillStyle='#0a150a'; ctx.fillRect(185,cy,310,24);
+      ctx.strokeStyle='#1a3a1a'; ctx.lineWidth=0.5; ctx.strokeRect(185,cy,310,24);
+      ctx.font='12px sans-serif'; ctx.fillStyle='#fff'; ctx.textAlign='left';
+      ctx.fillText(cd.sym,192,cy+17);
+      ctx.font='7px Share Tech Mono,monospace'; ctx.fillStyle='#aaa'; ctx.textAlign='left';
+      ctx.fillText(cd.n,215,cy+17);
+      ctx.fillStyle='#1565C0'; ctx.fillRect(460,cy+4,25,16);
+      ctx.strokeStyle='#1976D2'; ctx.lineWidth=1; ctx.strokeRect(460,cy+4,25,16);
+      ctx.font='bold 8px Orbitron,monospace'; ctx.fillStyle='#fff'; ctx.textAlign='center';
+      ctx.fillText('▶',472,cy+16);
+    });
+    ctx.fillStyle='#0a0800'; ctx.fillRect(500,40,130,140);
+    ctx.strokeStyle='#ffcc00'; ctx.lineWidth=1.5; ctx.strokeRect(500,40,130,140);
+    ctx.font='6px Orbitron,monospace'; ctx.fillStyle='#ffcc00'; ctx.textAlign='center';
+    ctx.fillText('VVPAT',565,56);
+    ctx.fillStyle='#fffde7'; ctx.fillRect(515,65,100,80);
+    ctx.font='7px Share Tech Mono,monospace'; ctx.fillStyle='#555'; ctx.textAlign='center';
+    ctx.fillText('VERIFICATION',565,82); ctx.fillText('SLIP APPEARS',565,94); ctx.fillText('HERE FOR 7s',565,106);
+  }
+}
+
+function loadPhase(idx) {
+  GS.phase = idx;
+  if(idx >= PHASES.length){ showEnd(); return; }
+  const ph = PHASES[idx];
+  document.getElementById('hudPhase').textContent = ph.hudPhase;
+  document.getElementById('hudLoc').textContent = ph.loc;
+  document.getElementById('pfTitle').textContent = ph.title;
+  document.getElementById('pfSub').textContent = ph.sub;
+  document.getElementById('npcAv').textContent = ph.npc.av;
+  document.getElementById('npcAv').style.background = ph.npc.bg;
+  document.getElementById('npcAv').style.color = ph.npc.color;
+  document.getElementById('npcName').textContent = ph.npc.nm;
+  document.getElementById('npcRole').textContent = ph.npc.role;
+  document.getElementById('feedback').style.display='none';
+  document.getElementById('aiStrip').style.display='none';
+  document.getElementById('nextBtn').style.display='none';
+  document.getElementById('miniGame').innerHTML='';
+  document.getElementById('miniGame').style.display='none';
+  document.getElementById('choices').innerHTML='';
+  drawScene(ph.scene);
+  typeText('npcTxt', ph.txt);
+  setTimeout(()=>{
+    if(ph.miniGame) showMiniGame(ph.miniGame, ph);
+    else if(ph.choices) renderChoices(ph, idx);
+  }, ph.txt.length*18+300);
+  updateHUD();
+}
+
+function typeText(id, text, speed=16) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.textContent=''; let i=0;
+  const t=setInterval(()=>{ if(i<text.length){el.textContent+=text[i];i++;}else clearInterval(t); },speed);
+}
+
+function showMiniGame(type, ph) {
+  const mg = document.getElementById('miniGame');
+  mg.style.display='block';
+  if(type==='id_select') {
+    mg.innerHTML = `<div style="padding:12px 14px;background:#000;border-top:2px solid #00ffcc;">
+      <div class="mg-title">SELECT YOUR VALID ID DOCUMENT</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        ${[
+          {n:'EPIC / VOTER ID CARD',c:'#001a2a',tc:'#00ffcc',correct:true,info:'PRIMARY VALID ID'},
+          {n:'PUBLIC LIBRARY CARD',c:'#1a0a00',tc:'#ff8844',correct:false,info:'NOT VALID FOR VOTING'},
+          {n:'AADHAAR CARD',c:'#1a1a00',tc:'#ffcc00',correct:true,info:'VALID ALTERNATE ID'},
+          {n:'STUDENT ID CARD',c:'#0a001a',tc:'#aa88ff',correct:false,info:'NOT ACCEPTED AT BOOTH'}
+        ].map((id,i)=>`
+          <div onclick="VC.pickID(${id.correct},'${id.info}')" style="background:${id.c};border:1px solid ${id.tc};border-radius:4px;padding:12px;cursor:pointer;text-align:center;transition:all 0.15s;" onmouseover="this.style.borderWidth='2px'" onmouseout="this.style.borderWidth='1px'">
+            <div style="font-family:'Orbitron',monospace;font-size:10px;color:${id.tc};letter-spacing:1px;margin-bottom:4px;">${id.n}</div>
+            <div style="font-size:9px;color:#555;">${id.info}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  } else if(type==='ink') {
+    mg.innerHTML = `<div style="padding:12px 14px;background:#000;border-top:2px solid #ffcc00;">
+      <div class="mg-title">MINI-GAME: APPLY INDELIBLE INK</div>
+      <div id="inkBox" style="text-align:center;">
+        <div style="font-size:12px;color:#888;margin-bottom:10px;font-family:'Share Tech Mono',monospace;">Click and hold the finger to apply indelible ink</div>
+        <svg id="fingerSvg" width="80" height="140" viewBox="0 0 80 140" style="cursor:pointer;display:block;margin:0 auto 10px;" onmousedown="VC.startInk()" ontouchstart="VC.startInk()">
+          <ellipse cx="40" cy="80" rx="25" ry="55" fill="#d4c5a9" stroke="#aaa" stroke-width="1"/>
+          <ellipse cx="40" cy="35" rx="20" ry="28" fill="#d4c5a9" stroke="#aaa" stroke-width="1"/>
+          <rect id="inkRect" x="15" y="15" width="50" height="0" rx="3" fill="#1a237e" opacity="0.85"/>
+          <text x="40" y="130" text-anchor="middle" font-size="9" fill="#555" font-family="Share Tech Mono,monospace">LEFT INDEX</text>
+        </svg>
+        <div style="width:180px;margin:0 auto;">
+          <div style="font-size:10px;color:#ffcc00;margin-bottom:4px;font-family:'Orbitron',monospace;">INK APPLICATION</div>
+          <div style="height:6px;background:#222;border-radius:3px;"><div id="inkFill" style="height:6px;border-radius:3px;background:#1a237e;width:0%;transition:width 0.1s;"></div></div>
+          <div style="font-family:'Orbitron',monospace;font-size:11px;color:#1a237e;margin-top:4px;" id="inkPct">0%</div>
+        </div>
+      </div>
+    </div>`;
+    GS.inkProgress = 0; GS.inkInterval = null;
+  } else if(type==='evm') {
+    mg.innerHTML = `<div style="padding:12px 14px;background:#000;border-top:2px solid #00ff88;">
+      <div class="mg-title">CAST YOUR VOTE — SELECT A CANDIDATE</div>
+      <div id="evmBox">
+        <div class="evm-title">EVM BALLOT UNIT · BOOTH 12 · ACTIVE</div>
+        ${[
+          {sym:'☀',n:'ANAND KUMAR',party:'VIKAS PARTY'},
+          {sym:'⚡',n:'PREET SINGH',party:'JANTA FRONT'},
+          {sym:'🌿',n:'SANYA PATEL',party:'PRAGATISHEEL'},
+          {sym:'★',n:'NOTA',party:'NONE OF THE ABOVE'}
+        ].map((c,i)=>`
+          <div class="evm-candidate" onclick="VC.castVote('${c.n}','${c.sym}')">
+            <div class="evm-sym" style="font-size:14px;">${c.sym}</div>
+            <div style="flex:1;padding:0 10px;">
+              <div style="font-family:'Orbitron',monospace;font-size:9px;color:#00ff88;letter-spacing:1px;">${c.n}</div>
+              <div style="font-size:9px;color:#444;margin-top:2px;">${c.party}</div>
+            </div>
+            <div class="evm-btn">▶</div>
+          </div>`).join('')}
+        <div style="font-size:9px;color:#333;text-align:center;margin-top:8px;font-family:'Share Tech Mono',monospace;">PRESS BLUE BUTTON TO CAST VOTE</div>
+      </div>
+      <div id="vvpatBox">
+        <div class="vvpat-title">VVPAT · VERIFY YOUR VOTE · <span id="vvTimer" style="color:#ffcc00;">7</span>s</div>
+        <div class="vvpat-slip" id="vvSlip">Loading...</div>
+        <div style="font-size:9px;color:#ffcc00;margin-top:6px;font-family:'Share Tech Mono',monospace;">Slip will drop after 7 seconds</div>
+      </div>
+    </div>`;
+  }
+}
+
+let inkHolding = false;
+function startInk() {
+  if(GS.inkDone) return;
+  inkHolding = true;
+  GS.inkInterval = setInterval(()=>{
+    if(!inkHolding) return;
+    GS.inkProgress = Math.min(100, GS.inkProgress+4);
+    const fill = document.getElementById('inkFill');
+    const pct = document.getElementById('inkPct');
+    const rect = document.getElementById('inkRect');
+    if(fill) fill.style.width = GS.inkProgress+'%';
+    if(pct) pct.textContent = Math.round(GS.inkProgress)+'%';
+    if(rect) { rect.setAttribute('height', Math.round(GS.inkProgress*0.5)); }
+    if(GS.inkProgress>=100) {
+      clearInterval(GS.inkInterval);
+      GS.inkDone = true;
+      GS.civic = Math.min(100, GS.civic+25);
+      updateHUD();
+      const box = document.getElementById('inkBox');
+      if(box) box.innerHTML += `<div style="font-family:'Orbitron',monospace;font-size:10px;color:#ffcc00;margin-top:8px;letter-spacing:2px;">INK APPLIED. FORM 17A SIGNED.</div>
+      <div style="font-size:11px;color:#888;margin-top:4px;font-family:'Share Tech Mono',monospace;">The indelible ink is a silver nitrate compound — it stains the skin for 72+ hours, making double voting physically impossible. India uses it in all 1M+ polling stations.</div>`;
+      setTimeout(()=>{ document.getElementById('nextBtn').style.display='block'; },800);
+    }
+  },60);
+}
+document.addEventListener('mouseup',()=>{ inkHolding=false; });
+document.addEventListener('touchend',()=>{ inkHolding=false; });
+
+function pickID(correct, info) {
+  document.querySelectorAll('#miniGame [onclick]').forEach(e=>e.style.pointerEvents='none');
+  const fb = document.getElementById('feedback');
+  fb.style.display='block';
+  if(correct) {
+    fb.className='feedback-strip good';
+    fb.innerHTML='<span style="font-family:Orbitron,monospace;font-size:10px;font-weight:700;letter-spacing:2px;">IDENTITY VERIFIED</span><br><br>'+info+'. The officer checks your name and photo against the electoral roll entry. A tick mark is made next to your serial number. Valid IDs include: EPIC card, Aadhaar, Passport, Driving Licence, PAN card, MNREGA job card, bank passbook with photo (any 1 of 12 accepted documents).';
+    GS.civic = Math.min(100, GS.civic+25); updateHUD();
+    GS.choices.push({ph:'ID Verification',good:true});
+  } else {
+    fb.className='feedback-strip bad';
+    fb.innerHTML='<span style="font-family:Orbitron,monospace;font-size:10px;font-weight:700;letter-spacing:2px;">ID REJECTED</span><br><br>'+info+'. The Election Commission accepts 12 specific documents. Library cards and student IDs are not among them. Always carry your EPIC (Voter ID) card or Aadhaar to the polling station.';
+    GS.choices.push({ph:'ID Verification',good:false});
+  }
+  setTimeout(()=>{ document.getElementById('nextBtn').style.display='block'; },600);
+}
+
+let vvpatCountdown;
+function castVote(name, sym) {
+  document.querySelectorAll('.evm-candidate').forEach(e=>e.style.pointerEvents='none');
+  GS.evmChoice = name;
+  const beep = new AudioContext();
+  const osc = beep.createOscillator(); const gain = beep.createGain();
+  osc.connect(gain); gain.connect(beep.destination);
+  osc.frequency.value=880; gain.gain.value=0.15; osc.start(); osc.stop(beep.currentTime+0.18);
+  const vvpat = document.getElementById('vvpatBox');
+  const slip = document.getElementById('vvSlip');
+  if(vvpat) vvpat.style.display='block';
+  if(slip) slip.innerHTML = `<div style="font-size:14px;margin-bottom:4px;">${sym}</div><div style="font-weight:700;font-size:11px;">${name}</div><div style="font-size:9px;color:#666;margin-top:2px;">CONSTITUENCY: 47-RAJAJI NAGAR<br>BOOTH: 12 · SERIAL: 0847</div>`;
+  let s=7;
+  const timerEl = document.getElementById('vvTimer');
+  vvpatCountdown = setInterval(()=>{
+    s--;
+    if(timerEl) timerEl.textContent=s;
+    if(s<=0){
+      clearInterval(vvpatCountdown);
+      if(slip) slip.innerHTML='<div style="color:#555;font-size:10px;padding:10px 0;">Slip dropped into sealed box</div>';
+      GS.civic=Math.min(100,GS.civic+25); GS.vvpatDone=true; updateHUD();
+      GS.choices.push({ph:'EVM Vote',good:true});
+      const fb=document.getElementById('feedback');
+      fb.style.display='block'; fb.className='feedback-strip good';
+      fb.innerHTML='<span style="font-family:Orbitron,monospace;font-size:10px;font-weight:700;letter-spacing:2px;">VOTE CAST. VVPAT VERIFIED.</span><br><br>The EVM records your vote electronically. The VVPAT slip confirms it visually. The slip drops into a sealed box — it can be retrieved for verification if a court orders a recount. India\'s EVMs are standalone, non-networked machines — they cannot be hacked remotely.';
+      setTimeout(()=>{ document.getElementById('nextBtn').style.display='block'; },600);
+    }
+  },1000);
+}
+
+function renderChoices(ph, idx) {
+  if(!ph.choices) return;
+  const ca = document.getElementById('choices');
+  ca.innerHTML = ph.choices.map((c,i)=>`<div class="choice" onclick="VC.pickChoice(${idx},${i})" id="ch${i}"><div class="ck">${c.k}</div><div class="ct">${c.t}</div></div>`).join('');
+}
+
+async function pickChoice(phIdx, cIdx) {
+  const ph = PHASES[phIdx];
+  const c = ph.choices[cIdx];
+  document.querySelectorAll('.choice').forEach(e=>e.style.pointerEvents='none');
+  const chosen = document.getElementById('ch'+cIdx);
+  if(chosen){chosen.style.borderColor='#ff6ec7';chosen.style.background='#1a0020';}
+  GS.civic = Math.min(100,GS.civic+c.delta); updateHUD();
+  GS.choices.push({ph:ph.title,good:c.good});
+  const fb=document.getElementById('feedback');
+  fb.style.display='block'; fb.className='feedback-strip '+(c.good?'good':'bad');
+  fb.innerHTML=`<span style="font-family:Orbitron,monospace;font-size:10px;font-weight:700;letter-spacing:2px;">${c.good?'✓ CORRECT':'✗ LEARN THIS'}</span><br><br>${c.fb}`;
+  document.getElementById('aiStrip').style.display='block';
+  try {
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:`You narrate an Indian election simulation game. Player is Priya Sharma, first-time voter. Current phase: "${ph.title}". She chose: "${c.t}". Result: ${c.good?'correct civic action':'mistake/learning moment'}. Write 2 vivid cinematic sentences (max 35 words) continuing her story. Reference actual Indian voting culture — indelible ink, EVM beep, long queues, etc. No quotes around the whole thing.`}]}],generationConfig:{maxOutputTokens:70,temperature:0.85}})
+    });
+    const d=await r.json();
+    const txt=d.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    const ai=document.getElementById('aiStrip');
+    if(txt&&ai){ai.style.color='#ff6ec7';ai.textContent=txt;}else if(ai)ai.style.display='none';
+  }catch(e){const ai=document.getElementById('aiStrip');if(ai)ai.style.display='none';}
+  document.getElementById('nextBtn').style.display='block';
+}
+
+function nextPhase() {
+  document.getElementById('nextBtn').style.display='none';
+  document.getElementById('feedback').style.display='none';
+  document.getElementById('aiStrip').style.display='none';
+  loadPhase(GS.phase+1);
+}
+
+function updateHUD() {
+  const bar=document.getElementById('civicBar');
+  const val=document.getElementById('civicVal');
+  if(bar) bar.style.width=GS.civic+'%';
+  if(val) val.textContent=GS.civic;
+}
+
+async function showEnd() {
+  clearInterval(timerInterval);
+  const m=Math.floor(GS.elapsed/60).toString().padStart(2,'0');
+  const s=(GS.elapsed%60).toString().padStart(2,'0');
+  const timeStr=m+':'+s;
+  const goodCount=GS.choices.filter(c=>c.good).length;
+  let rank,msg;
+  if(GS.civic>=85){rank='MODEL VOTER';msg='Priya Sharma navigated every step of India\'s polling process with confidence and civic pride. You know your rights, your documents, and your EVM.';}
+  else if(GS.civic>=55){rank='INFORMED CITIZEN';msg='You completed the voting process with some great choices. A few stumbles, but Priya cast her vote and her voice was heard in the world\'s largest democracy.';}
+  else{rank='FIRST ATTEMPT';msg='Some steps were confusing — that\'s normal for a first-time voter. Now you know exactly what to expect at the polling booth next time.';}
+
+  document.getElementById('mainGame').style.display='none';
+  const es=document.getElementById('endScreen');
+  es.style.display='flex';
+  document.getElementById('endRank').textContent=rank;
+  document.getElementById('endScore').textContent=`CIVIC SCORE: ${GS.civic} · TIME: ${timeStr}`;
+  document.getElementById('endMsg').textContent=msg;
+
+  try {
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:`You are wrapping up an Indian election education game. Priya Sharma, first-time voter, completed the simulation. Civic score: ${GS.civic}/100. Good choices: ${goodCount}. Time: ${timeStr}. Write a warm 3-sentence debrief. Mention one specific thing she did well (e.g. ink, EVM, VVPAT, ID check) and one tip for the real booth. End with an inspiring line about Indian democracy. Max 60 words.`}]}],generationConfig:{maxOutputTokens:110,temperature:0.8}})
+    });
+    const d=await r.json();
+    const txt=d.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    const aiEl=document.getElementById('endAi');
+    const loadEl=document.getElementById('endLoad');
+    if(txt&&aiEl){aiEl.textContent=txt;aiEl.style.display='block';}
+    if(loadEl)loadEl.style.display='none';
+  }catch(e){const l=document.getElementById('endLoad');if(l)l.style.display='none';}
+}
+
+function restartGame() {
+  GS.civic=0;GS.phase=0;GS.elapsed=0;GS.evmChoice='';GS.inkDone=false;GS.vvpatDone=false;GS.choices=[];GS.inkProgress=0;
+  document.getElementById('endScreen').style.display='none';
+  document.getElementById('mainGame').style.display='block';
+  GS.startTime=Date.now();
+  timerInterval=setInterval(updateTimer,1000);
+  loadPhase(0);
+}
+
+// Expose to window for HTML onclick handlers
+window.VC = { startGame, restartGame, nextPhase, loadPhase, pickChoice, pickID, castVote, startInk };
+
+})();
+</script>
+
+  </div>
+</div>
+
+<!-- CIVIC CALC OVERLAY -->
+<div id="cc-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);overflow-y:auto;">
+  <div style="position:relative;max-width:720px;margin:20px auto;border-radius:16px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,0.9);">
+    <button onclick="document.getElementById('cc-overlay').style.display='none'"
+      style="position:sticky;top:0;float:right;z-index:100;margin:10px 10px 0 0;background:rgba(0,255,204,0.1);border:1.5px solid #00ffcc;color:#00ffcc;border-radius:50%;width:34px;height:34px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:sans-serif;line-height:1;">✕</button>
+    <div id="cc-game-wrapper">
+      <style>
+#cc-game-wrapper {
+  background:#0a0a0f;
+  min-height:100%;
+  padding:16px 16px 40px;
+  --font-sans:'Plus Jakarta Sans',system-ui,sans-serif;
+  --color-background-primary:#13131f;
+  --color-background-secondary:#1a1a2e;
+  --color-text-primary:#f0ece4;
+  --color-text-secondary:#8888aa;
+  --color-border-primary:#2a2a3d;
+  --color-border-secondary:#2a2a3d;
+  --color-border-tertiary:#1e1e30;
+  --border-radius-sm:6px;
+  --border-radius-md:10px;
+  --border-radius-lg:16px;
+  font-family:var(--font-sans);
+}
+#cc-game-wrapper #cc-game { max-width:680px; margin:0 auto; }
+</style>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-sans);}
+#game{padding:1rem 0;max-width:680px;}
+.scene-box{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:1rem;}
+.location-bar{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.loc-badge{font-size:11px;font-weight:500;background:#E1F5EE;color:#085041;border-radius:99px;padding:3px 10px;}
+.day-badge{font-size:11px;background:var(--color-background-secondary);color:var(--color-text-secondary);border-radius:99px;padding:3px 10px;}
+.scene-img{width:100%;height:130px;border-radius:var(--border-radius-md);margin-bottom:12px;display:flex;align-items:center;justify-content:center;font-size:48px;background:var(--color-background-secondary);}
+.story-text{font-size:14px;color:var(--color-text-primary);line-height:1.7;min-height:60px;}
+.npc-row{display:flex;align-items:center;gap:10px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;margin:10px 0;}
+.npc-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:14px;flex-shrink:0;}
+.npc-speech{font-size:13px;color:var(--color-text-primary);line-height:1.5;}
+.npc-name{font-size:11px;color:var(--color-text-secondary);margin-top:2px;}
+.choices{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+.choice-btn{background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:10px 14px;font-size:13px;color:var(--color-text-primary);cursor:pointer;text-align:left;transition:background 0.15s;}
+.choice-btn:hover{background:var(--color-background-secondary);}
+.choice-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem;}
+.stat-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px 10px;text-align:center;}
+.stat-val{font-size:18px;font-weight:500;color:var(--color-text-primary);}
+.stat-lbl{font-size:10px;color:var(--color-text-secondary);margin-top:2px;}
+.progress-bar{height:4px;background:var(--color-background-secondary);border-radius:2px;margin-top:4px;}
+.progress-fill{height:4px;border-radius:2px;background:#1D9E75;transition:width 0.4s;}
+.feedback-box{background:#E1F5EE;border:0.5px solid #5DCAA5;border-radius:var(--border-radius-md);padding:10px 14px;font-size:13px;color:#085041;margin:10px 0;display:none;}
+.feedback-box.bad{background:#FCEBEB;border-color:#F09595;color:#791F1F;}
+.chapter-header{text-align:center;padding:1.5rem 0 0.5rem;}
+.chapter-header h2{font-size:18px;font-weight:500;color:var(--color-text-primary);}
+.chapter-header p{font-size:13px;color:var(--color-text-secondary);margin-top:4px;}
+.ai-loading{font-size:13px;color:var(--color-text-secondary);padding:8px 0;display:none;}
+.end-screen{text-align:center;padding:2rem 1rem;}
+.end-screen h2{font-size:20px;font-weight:500;margin-bottom:8px;}
+.end-screen p{font-size:14px;color:var(--color-text-secondary);line-height:1.6;margin-bottom:1.5rem;}
+.score-circle{width:80px;height:80px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:500;color:#085041;margin:0 auto 1rem;}
+.restart-btn{background:#1D9E75;color:#fff;border:none;border-radius:var(--border-radius-md);padding:10px 24px;font-size:14px;cursor:pointer;font-weight:500;}
+.restart-btn:hover{background:#0F6E56;}
+</style>
+
+<div id="cc-game">
+  <h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Election simulation game — experience voting firsthand in Maplewood City</h2>
+
+  <div class="stats-row" id="cc-statsRow" style="display:none;">
+    <div class="stat-card"><div class="stat-val" id="cc-s-know">0</div><div class="stat-lbl">Knowledge</div><div class="progress-bar"><div class="progress-fill" id="cc-p-know" style="width:0%"></div></div></div>
+    <div class="stat-card"><div class="stat-val" id="cc-s-civic">0</div><div class="stat-lbl">Civic score</div><div class="progress-bar"><div class="progress-fill" id="cc-p-civic" style="width:0%"></div></div></div>
+    <div class="stat-card"><div class="stat-val" id="cc-s-day">1</div><div class="stat-lbl">Day</div></div>
+    <div class="stat-card"><div class="stat-val" id="cc-s-chap">1/5</div><div class="stat-lbl">Chapter</div></div>
+  </div>
+
+  <div class="scene-box" id="cc-sceneBox">
+    <div class="chapter-header">
+      <div style="font-size:40px;margin-bottom:8px;">🗳️</div>
+      <h2>Welcome to Maplewood City</h2>
+      <p>A civic simulation where YOUR choices shape the story.</p>
+    </div>
+    <div style="margin:1rem 0;font-size:14px;color:var(--color-text-secondary);line-height:1.7;">
+      You are Alex Chen, a first-time voter in Maplewood City. Election Day is 7 days away. The city faces real issues — a crumbling bridge, failing schools, and rising rents. Two candidates are running for Mayor. Your journey will take you from clueless citizen to informed voter — but every choice matters.
+    </div>
+    <div class="choices">
+      <button class="choice-btn" onclick="CC.startGame()">Begin my story as Alex Chen →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+'use strict';
+
+const GEMINI_KEY = "AIzaSyBzd83MbWtpsUfM520qxloauhhQx1F5C_M";
+
+const state = {
+  chapter: 0,
+  knowledge: 0,
+  civic: 0,
+  day: 1,
+  history: [],
+  playerName: "Alex Chen",
+  choices_made: []
+};
+
+const chapters = [
+  {
+    id: 1,
+    title: "Day 1 — The notice in the mail",
+    location: "Alex's apartment",
+    emoji: "🏠",
+    day: 1,
+    setup: `You open your mailbox and find a Voter Registration Notice. Your neighbor Mrs. Patel knocks on your door, excited about the upcoming election.`,
+    npc: {name:"Mrs. Patel", avatar:"MP", color:"#E6F1FB", text:"Alex! Have you registered to vote yet? The deadline is in 3 days! Mayor Harris is running against newcomer Dana Rivera — this election could change everything for our neighborhood."},
+    choices: [
+      {text:"Ask Mrs. Patel to explain how voter registration works", delta:{know:15,civic:10}, feedback:"Great choice! Mrs. Patel explains that registration confirms your identity and address so officials know who is eligible to vote.", good:true},
+      {text:"Tell her you'll 'get around to it' and go back inside", delta:{know:0,civic:-5}, feedback:"You missed a chance to learn. Registration deadlines are real — if you miss it, you can't vote!", good:false},
+      {text:"Look up registration online yourself", delta:{know:20,civic:15}, feedback:"Excellent! You find your state's election website, fill in your name, address, and ID number. You're now registered!", good:true}
+    ]
+  },
+  {
+    id: 2,
+    title: "Day 3 — Candidates debate at Town Hall",
+    location: "Maplewood Town Hall",
+    emoji: "🏛️",
+    day: 3,
+    setup: `The Town Hall is packed. Candidates Mayor Harris and Dana Rivera are debating live. A campaign volunteer hands you a flyer for each candidate.`,
+    npc: {name:"Campaign volunteer", avatar:"CV", color:"#FAEEDA", text:"Hey! Before you decide who to vote for — have you looked at both candidates' platforms? Don't just vote for a name. Know what they stand for!"},
+    choices: [
+      {text:"Read both flyers carefully and watch the full debate", delta:{know:25,civic:20}, feedback:"Smart! You learn that Harris wants to fix the bridge but raise taxes. Rivera wants to cut taxes but privatize the schools. Now you can make an informed decision.", good:true},
+      {text:"Only read the flyer of the candidate your friend likes", delta:{know:5,civic:0}, feedback:"You only got one side of the story. Good voters research ALL candidates, not just the popular pick.", good:false},
+      {text:"Leave — debates are boring", delta:{know:0,civic:-10}, feedback:"You missed crucial information! Debates let you compare candidates directly. An uninformed vote can have consequences.", good:false}
+    ]
+  },
+  {
+    id: 3,
+    title: "Day 5 — Misinformation spreads",
+    location: "Maplewood Community Center",
+    emoji: "📱",
+    day: 5,
+    setup: `A viral social media post claims the election has been postponed. Your coworker Jake shows you the post on his phone, looking worried.`,
+    npc: {name:"Jake (coworker)", avatar:"JK", color:"#FAECE7", text:"Alex, did you see this? Says the election is cancelled due to 'voter fraud concerns.' I'm not sure if I should even bother going now..."},
+    choices: [
+      {text:"Check the official city election commission website to verify", delta:{know:20,civic:25}, feedback:"Perfect! The official site confirms the election is ON. You also find the real polling hours: 7am–8pm. Fact-checking official sources is essential.", good:true},
+      {text:"Share the post — better safe than sorry", delta:{know:0,civic:-20}, feedback:"You've spread misinformation! Sharing unverified claims can discourage voters and undermine democracy. Always verify before sharing.", good:false},
+      {text:"Ignore it and assume it's fake", delta:{know:5,civic:5}, feedback:"Good instinct to be skeptical, but you should always verify. Checking official sources gives you accurate info AND you can correct others.", good:true}
+    ]
+  },
+  {
+    id: 4,
+    title: "Day 7 — Election Day arrives",
+    location: "Maplewood Polling Station #4",
+    emoji: "🗳️",
+    day: 7,
+    setup: `It's finally Election Day! You arrive at your polling station — a local school gymnasium. There's a short line. A poll worker greets you at the check-in table.`,
+    npc: {name:"Poll worker", avatar:"PW", color:"#EAF3DE", text:"Good morning! I'll need your voter registration confirmation or a valid photo ID. Once checked in, you'll receive your ballot. You'll have a private booth — take your time."},
+    choices: [
+      {text:"Show your ID, check in, go to the private booth and vote carefully", delta:{know:15,civic:30}, feedback:"You voted! You reviewed each candidate one final time in the booth, then made your choice. The poll worker gives you an 'I Voted' sticker.", good:true},
+      {text:"Ask if you can take a photo of your ballot to prove you voted", delta:{know:0,civic:-15}, feedback:"Actually, photographing ballots is illegal in most places — it can violate ballot secrecy and privacy laws. Your vote is private by design.", good:false},
+      {text:"Rush through without reading the full ballot carefully", delta:{know:5,civic:10}, feedback:"You voted, but you may have missed some ballot measures further down. Always read the FULL ballot — there's often more than just the main race!", good:false}
+    ]
+  },
+  {
+    id: 5,
+    title: "Election night — results come in",
+    location: "Maplewood Community Watch Party",
+    emoji: "📺",
+    day: 8,
+    setup: `The city gathers to watch the results. The race is close. Dana Rivera leads by 847 votes with 95% reporting. Suddenly the losing candidate's supporters claim the results are wrong.`,
+    npc: {name:"News anchor on TV", avatar:"NA", color:"#EEEDFE", text:"A recount has been requested by the Mayor's campaign. Recounts are a normal, legal part of elections when margins are razor-thin. Election officials will recount every ballot by hand."},
+    choices: [
+      {text:"Trust the process — recounts exist for exactly this reason", delta:{know:15,civic:25}, feedback:"Exactly right. Recounts are a legal safeguard that ensure every vote is counted accurately. The final certified result is what matters.", good:true},
+      {text:"Demand the winner be declared immediately — the delay is suspicious", delta:{know:0,civic:-10}, feedback:"Patience is part of democracy. Rushing certification before all votes are verified undermines the integrity of elections.", good:false},
+      {text:"Learn about how ballots are certified and audited", delta:{know:25,civic:20}, feedback:"You discover that ballots go through multiple checks: chain-of-custody logs, signature verification, and bipartisan observer review. The system is robust.", good:true}
+    ]
+  }
+];
+
+function startGame() {
+  document.getElementById('cc-statsRow').style.display = 'grid';
+  loadChapter(0);
+}
+
+function loadChapter(idx) {
+  state.chapter = idx;
+  if(idx >= chapters.length) { showEnd(); return; }
+  const ch = chapters[idx];
+  state.day = ch.day;
+  updateStats();
+  const box = document.getElementById('cc-sceneBox');
+  box.innerHTML = `
+    <div class="location-bar">
+      <span class="loc-badge">${ch.emoji} ${ch.location}</span>
+      <span class="day-badge">Day ${ch.day}</span>
+    </div>
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-secondary);margin-bottom:10px;">Chapter ${ch.id} of 5 — ${ch.title}</div>
+    <div class="story-text" id="cc-storyText">${ch.setup}</div>
+    <div class="npc-row">
+      <div class="npc-avatar" style="background:${ch.npc.color};color:#0C447C;">${ch.npc.avatar}</div>
+      <div><div class="npc-speech">"${ch.npc.text}"</div><div class="npc-name">${ch.npc.name}</div></div>
+    </div>
+    <div class="feedback-box" id="cc-feedback"></div>
+    <div class="ai-loading" id="cc-aiLoad">Thinking...</div>
+    <div class="choices" id="cc-choiceArea">
+      ${ch.choices.map((c,i)=>`<button class="choice-btn" onclick="CC.makeChoice(${idx},${i})">${c.text}</button>`).join('')}
+    </div>
+  `;
+}
+
+async function makeChoice(chapIdx, choiceIdx) {
+  const ch = chapters[chapIdx];
+  const choice = ch.choices[choiceIdx];
+  document.querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);
+  state.knowledge = Math.min(100, state.knowledge + choice.delta.know);
+  state.civic = Math.min(100, state.civic + choice.delta.civic);
+  state.choices_made.push({chapter: ch.title, choice: choice.text, good: choice.good});
+  updateStats();
+  const fb = document.getElementById('cc-feedback');
+  fb.style.display = 'block';
+  fb.className = 'feedback-box' + (choice.good ? '' : ' bad');
+  fb.textContent = choice.feedback;
+  const aiLoad = document.getElementById('cc-aiLoad');
+  aiLoad.style.display = 'block';
+  const storyEl = document.getElementById('cc-storyText');
+  try {
+    const prompt = `You are narrating an election education simulation game set in Maplewood City. 
+The player is Alex Chen, a first-time voter.
+Current chapter: "${ch.title}"
+Player just chose: "${choice.text}"
+Outcome was: ${choice.good ? 'positive/educational' : 'negative/learning moment'}
+Write a SHORT 2-sentence story continuation (max 40 words) that moves the story forward based on this choice. Be vivid, warm, and educational. Do not repeat the feedback already shown. End with a hint at what comes next.`;
+    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:80,temperature:0.8}})
+    });
+    const data = await resp.json();
+    const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    if(aiText) storyEl.textContent = aiText;
+  } catch(e) {}
+  aiLoad.style.display = 'none';
+  const choiceArea = document.getElementById('cc-choiceArea');
+  choiceArea.innerHTML = `<button class="choice-btn" onclick="CC.loadChapter(${chapIdx+1})">${chapIdx+1 < chapters.length ? 'Continue to next chapter →' : 'See your results →'}</button>`;
+}
+
+function updateStats() {
+  document.getElementById('cc-s-know').textContent = state.knowledge;
+  document.getElementById('cc-s-civic').textContent = state.civic;
+  document.getElementById('cc-s-day').textContent = state.day;
+  document.getElementById('cc-s-chap').textContent = `${state.chapter+1}/5`;
+  document.getElementById('cc-p-know').style.width = state.knowledge + '%';
+  document.getElementById('cc-p-civic').style.width = state.civic + '%';
+}
+
+async function showEnd() {
+  document.getElementById('cc-statsRow').style.display = 'none';
+  const box = document.getElementById('cc-sceneBox');
+  const total = state.knowledge + state.civic;
+  const maxScore = 200;
+  const pct = Math.round((total/maxScore)*100);
+  let grade, msg;
+  if(pct>=80){grade="Model citizen";msg="You navigated every step of the election process with skill and integrity. Maplewood is lucky to have voters like you!";}
+  else if(pct>=55){grade="Engaged voter";msg="You made mostly good choices and learned a lot along the way. A few stumbles, but you showed up and your voice was heard.";}
+  else{grade="First-time learner";msg="You experienced some of the pitfalls first-time voters face. The good news? Now you know what to watch out for next time.";}
+  box.innerHTML = `<div class="end-screen">
+    <div class="score-circle">${pct}%</div>
+    <h2>${grade}</h2>
+    <p>${msg}</p>
+    <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:1.5rem;">Knowledge: ${state.knowledge}/100 &nbsp;|&nbsp; Civic score: ${state.civic}/100</p>
+    <button class="restart-btn" onclick="CC.restartGame()">Play again →</button>
+    <div style="margin-top:1rem;">
+      <button class="choice-btn" style="display:inline-block;margin-top:8px;" onclick="void(0)">Learn more about voting ↗</button>
+    </div>
+  </div>`;
+  const aiLoad = document.createElement('div');
+  aiLoad.style.cssText = 'font-size:13px;color:var(--color-text-secondary);padding:8px 1.25rem;';
+  aiLoad.textContent = 'Getting your personalized debrief...';
+  box.appendChild(aiLoad);
+  try {
+    const goodChoices = state.choices_made.filter(c=>c.good).length;
+    const prompt = `An election education game just ended. The player (first-time voter "Alex Chen") made ${goodChoices} out of 5 good civic choices. Their knowledge score is ${state.knowledge}/100 and civic score is ${state.civic}/100. 
+Write a short, warm, personalized 3-sentence debrief. Mention 1 specific thing they likely learned and 1 area to keep improving. End with an encouraging sentence about real-world voting.`;
+    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:120,temperature:0.7}})
+    });
+    const data = await resp.json();
+    const txt = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    if(txt){
+      aiLoad.style.cssText = 'font-size:13px;color:var(--color-text-primary);line-height:1.7;padding:12px 1.25rem;background:var(--color-background-secondary);border-radius:var(--border-radius-md);margin:0 1.25rem 1rem;';
+      aiLoad.textContent = txt;
+    } else { aiLoad.remove(); }
+  } catch(e){ aiLoad.remove(); }
+}
+
+function restartGame() {
+  state.chapter=0; state.knowledge=0; state.civic=0; state.day=1;
+  state.choices_made=[];
+  document.getElementById('cc-statsRow').style.display='none';
+  document.getElementById('cc-sceneBox').innerHTML = `
+    <div class="chapter-header">
+      <div style="font-size:40px;margin-bottom:8px;">🗳️</div>
+      <h2>Welcome back to Maplewood City</h2>
+      <p>Your choices will be different this time. What kind of citizen will you be?</p>
+    </div>
+    <div class="choices"><button class="choice-btn" onclick="CC.startGame()">Begin again as Alex Chen →</button></div>
+  `;
+}
+
+window.CC = { startGame, restartGame, loadChapter, makeChoice };
+
+})();
+</script>
+
+    </div>
+  </div>
+</div>
+
+
+<script>
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.getElementById('vc-overlay').style.display = 'none';
+    document.getElementById('cc-overlay').style.display = 'none';
+  }
+});
+// Close on backdrop click
+['vc-overlay','cc-overlay'].forEach(function(id) {
+  document.getElementById(id).addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+  });
+});
+</script>
+</body>
+</html>
